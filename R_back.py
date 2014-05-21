@@ -3,7 +3,6 @@ from triangle.plot import plot
 from cgalgo import *
 import numpy as np
 import matplotlib.pyplot as plt
-from collections import *
 import time
 
 class Ruper:
@@ -34,14 +33,13 @@ class Ruper:
             a, b, c = sorted((tri[0], tri[1], tri[2]))
             self.delaunay_triangles[(a, b, c)] = True
 
-    def BruteForcePointLocation(self, p):
+    def PointLocation(self, p):
         for tri in self.delaunay_triangles.keys():
             a, b, c = self.vertices[tri[0]], self.vertices[tri[1]], self.vertices[tri[2]]
             if InTriangle(p, a, b, c):
                 return tri
 
     def AddTriangle(self, a, b, c):
-        self.added_Triangle.append(tuple(sorted((a, b, c))))
         a, b, c = sorted((a, b, c))
         self.delaunay_triangles[(a, b, c)] = True
         tri = (a, b, c)
@@ -51,7 +49,6 @@ class Ruper:
             self.InsertVertices_Segments(a, b, c)
 
     def DelTriangle(self, a, b, c):
-        self.deled_Triangle.append(tuple(sorted((a, b, c))))
         self.delaunay_triangles.pop(tuple(sorted((a, b, c))))
         tri = (a, b, c)
         for ind in range(3):
@@ -94,10 +91,8 @@ class Ruper:
         self.STest(p, c, a)
 
     def UpdateTriangulate(self):
-        self.added_Triangle = []
-        self.deled_Triangle = []
         p = len(self.vertices) - 1
-        tri = self.BruteForcePointLocation(self.vertices[p])
+        tri = self.PointLocation(self.vertices[p])
         a, b, c = tri[0], tri[1], tri[2]
         self.DelTriangle(a, b, c)
         self.AddTriangle(p, a, b)
@@ -136,33 +131,15 @@ class Ruper:
     def IsEncroached(self, segment):
         a, b = self.vertices[segment[0]], self.vertices[segment[1]]
         pair = tuple(sorted((segment[0], segment[1])))
-        if self.segments.has_key(pair) == False:
-            return False
         if self.segments_vertices.has_key(pair) == False or len(self.segments_vertices[pair]) == 0:
             return True
         mid = (a + b) / 2.0
-        r = GetDistance(a, b) / 2.0
+        r = GetDistance(a, b) * 0.5
         for ind in self.segments_vertices[pair].keys():
             v = self.vertices[ind]
             if sgn(GetDistance(v, mid) - r) < 0:
                 return True
         return False
-
-    def CheckEncroachedSegments(self, triangleList):
-        encroachedSegments = []
-        for tri in triangleList:
-            for ind in range(3):
-                a, b = tri[ind], tri[(ind + 1) % 3]
-                if self.IsEncroached([a, b]):
-                    encroachedSegments.append([a, b])
-        return encroachedSegments
-
-    def CheckSkinnyTriangles(self, triangleList):
-        skinnyTriangles = []
-        for tri in triangleList:
-            if self.IsSkinny(tri):
-                skinnyTriangles.append(tri)
-        return skinnyTriangles
 
     def SplitSegment(self, segment):
         a = self.vertices[segment[0]]
@@ -176,22 +153,9 @@ class Ruper:
         seg_type = self.segments_type.pop(tuple(sorted((segment[0], segment[1]))))
         self.segments_type[tuple(sorted((segment[0], cnt)))] = seg_type
         self.segments_type[tuple(sorted((segment[1], cnt)))] = seg_type
-        self.UpdateTriangulate()
-        encroachedSegments = []
-        skinnyTriangles = []
-        encroachedSegments += self.CheckEncroachedSegments(self.added_Triangle)
-        encroachedSegments += self.CheckEncroachedSegments(self.deled_Triangle)
-#        skinnyTriangles += self.CheckSkinnyTriangles(self.added_Triangle)
-#        skinnyTriangles += self.CheckSkinnyTriangles(self.deled_Triangle)
-        for segment in encroachedSegments:
-            self.queueS.append(segment)
-#        for tri in skinnyTriangles:
-#            self.queueT.append(tri)
+        self.Show()
 
-    def IsSkinny(self, tri):
-        if self.delaunay_triangles.has_key(tuple(sorted((tri[0], tri[1], tri[2])))) == False:
-            return False
-        a, b, c = self.vertices[tri[0]], self.vertices[tri[1]], self.vertices[tri[2]]
+    def IsSkinny(self, a, b, c):
         o = GetCircCenter(a, b, c)
         r = GetDistance(a, o)
         d = np.min((GetDistance(a, b), GetDistance(b, c), GetDistance(a, c)))
@@ -207,21 +171,44 @@ class Ruper:
             if sgn(GetDistance(o, mid) - r) < 0:
                 return ind, segment
 
-    def InitializeSegmentQueue(self):
-        self.queueS = deque()
-        for segment in self.segments:
-            if self.IsEncroached(segment):
-                self.queueS.append(segment)
+    def InsertPoint(self, o):
+        self.vertices = np.vstack((self.vertices, np.array([o])))
 
     def EliminateSegment(self):
-        while len(self.queueS) > 0:
-            segment = self.queueS.popleft()
-            self.Show()
-            print segment
-            if self.IsEncroached(segment):
-                self.SplitSegment(segment)
+        change = True
+        while change == True:
+            change = False
+            for ind, segment in enumerate(self.segments):
+                if self.IsEncroached(segment) == True:
+                    self.SplitSegment(segment)
+                    self.delaunay = self.UpdateTriangulate()
+                    change = True
+                    eliminated = True
+                    break
 
-
+#    def EliminateAngle(self):
+#        change = True
+#        while change == True:
+#            change = False
+#            for tri in self.delaunay_triangles:
+#                print tri
+#                raw_input()
+#                a, b, c = self.vertices[tri[0]], self.vertices[tri[1]], self.vertices[tri[2]]
+#                if self.IsSkinny(a, b, c) == True:
+#                    o = GetCircCenter(a, b, c)
+#                    e = self.ConflictSegment(o)
+#                    if e == None:
+#                        self.InsertPoint(o)
+#                        self.delaunay = self.Triangulate(True)
+#                        self.EliminateSegment()
+#                    else:
+#                        self.SplitSegment(e[1], e[0])
+#                        self.delaunay = self.Triangulate(True)
+#                        self.EliminateSegment()
+#                    change = True
+#                    eliminated = True
+#                    break
+#
     def CrossCount(self, u, v):
         count = 0
         for segment in self.segments:
@@ -249,55 +236,16 @@ class Ruper:
         for rm in rmKeys:
             self.delaunay_triangles.pop(rm)
 
-    def InitializeTriangleQueue(self):
-        self.queueT = deque()
-        for tri in self.delaunay_triangles:
-            if self.IsSkinny(tri):
-                self.queueT.append(tri)
 
-    def RecoverTriangles(self):
-        addTriangles = self.added_Triangle[:]
-        delTriangles = self.deled_Triangle[:]
-        self.added_Triangle = []
-        self.deled_Triangle = []
-        for tri in delTriangles:
-            self.AddTriangle(tri[0], tri[1], tri[2])
-        for tri in addTriangles:
-            self.DelTriangle(tri[0], tri[1], tri[2])
-        self.vertices.pop()
-
-    def InsertCircleCenter(self, a, b, c):
-        o = GetCircCenter(a, b, c)
-        self.vertices.append(o)
-        self.UpdateTriangulate()
-        encroachedSegments = []
-        encroachedSegments += self.CheckEncroachedSegments(self.added_Triangle)
-        encroachedSegments += self.CheckEncroachedSegments(self.deled_Triangle)
-        if len(encroachedSegments) > 0:
-            self.RecoverTriangles()
-            for segment in encroachedSegments:
-                self.queueS.append(segment)
-            self.EliminateSegment()
-        else:
-            skinnyTriangles = []
-            skinnyTriangles += self.CheckSkinnyTriangles(self.added_Triangle)
-            skinnyTriangles += self.CheckSkinnyTriangles(self.deled_Triangle)
-            for tri in skinnyTriangles:
-                self.queueT.append(tri)
-
-    def EliminateAngle(self):
-        while len(self.queueT) > 0:
-            tri = self.queueT.popleft()
-            if self.IsSkinny(tri):
-                self.InsertCircleCenter(self.vertices[tri[0]], self.vertices[tri[1]], self.vertices[tri[2]])
+                    
 
     def Start(self):
         self.Triangulate()
-        self.InitializeSegmentQueue()
-#        self.InitializeTriangleQueue()
         self.EliminateSegment()
+        self.RemoveOutside()
+        self.Show()
 #        self.RemoveOutside()
-#        self.InitializeTriangleQueue()
+#        self.delaunay = self.Triangulate(rem = True)
 #        self.EliminateAngle()
 
 
@@ -308,8 +256,8 @@ if __name__ == '__main__':
         a, b = sorted((segment[0], segment[1]))
         planar['segments_type'][(a, b)] = 1
     ruper = Ruper(planar)
-    now = time.time()
+#    now = time.time()
     ruper.Start()
 #    print time.time() - now
-    ruper.Show()
-    
+#    ruper.Show()
+   

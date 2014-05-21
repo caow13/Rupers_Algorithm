@@ -22,7 +22,6 @@ class Ruper:
         planar = {'vertices' : self.vertices, 'segments' : self.segments}
         plot(plt.axes(), **planar)
         plot(plt.axes(), **tri)
-        plt.plot(self.vertices[-1][0], self.vertices[-1][1], 'bo')
         plt.show()
         plt.clf()
 
@@ -35,7 +34,6 @@ class Ruper:
         if appear == False:
             return True
         mid = (a + b) / 2.0
-        print mid
         r = GetDistance(a, b) * 0.5
         for v in self.vertices:
             if sgn(GetDistance(v, mid) - r) < 0:
@@ -77,15 +75,15 @@ class Ruper:
         eliminated = False
         change = True
         while change == True:
+            self.Show()
             change = False
             for ind, segment in enumerate(self.segments):
-                if segment[0] == 10 and segment[1] == 11:
-                    if self.IsEncroached(segment) == True:
-                        self.SplitSegment(segment, ind)
-                        self.delaunay = self.Triangulate()
-                        change = True
-                        eliminated = True
-                        break
+                if self.IsEncroached(segment) == True:
+                    self.SplitSegment(segment, ind)
+                    self.delaunay = self.Triangulate()
+                    change = True
+                    eliminated = True
+                    break
         return eliminated
 
     def EliminateAngle(self):
