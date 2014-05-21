@@ -30,10 +30,12 @@ def GetCircCenter(a, b, c):
 
 def GetSegIntersection(a, b, c, d):
     d1, d2, d3, d4 = sgn(cross(a, b, c)), sgn(cross(a, b, d)), sgn(cross(d, c, a)), sgn(cross(d, c, b))
-    if d1 == 0 or d2 == 0 or d3 == 0 or d4 == 0:
-        return None
     if d1 * d2 < 0 and d3 * d4 < 0:
         return True
+    if d1 * d2 > 0 or d3 * d4 > 0:
+        return False
+    if d1 == 0 or d2 == 0 or d3 == 0 or d4 == 0:
+        return None
     return False
 
 def InTriangle(p, a, b, c):

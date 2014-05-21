@@ -128,13 +128,14 @@ class Ruper:
         a, b = sorted((a, b))
         self.segments_vertices[(a, b)].pop(c)
 
-    def Show(self):
+    def Show(self, debug = False):
         planar = {'vertices' : np.array(self.vertices), 'segments' : np.array(self.segments.keys())}
         tri = {'vertices' : np.array(self.vertices), 'triangles' : np.array(self.delaunay_triangles.keys())}
         plot(plt.axes(), **planar)
         plot(plt.axes(), **tri)
-        plt.show()
-        plt.clf()
+        if debug == False:
+            plt.show()
+            plt.clf()
 
     def IsEncroached(self, segment):
         a, b = self.vertices[segment[0]], self.vertices[segment[1]]
@@ -200,6 +201,8 @@ class Ruper:
             return False
         a, b, c = self.vertices[tri[0]], self.vertices[tri[1]], self.vertices[tri[2]]
         o = GetCircCenter(a, b, c)
+        if o == None:
+            return True
         r = GetDistance(a, o)
         d = np.min((GetDistance(a, b), GetDistance(b, c), GetDistance(a, c)))
         if sgn(r / d -  np.sqrt(2)) > 0:
@@ -244,6 +247,10 @@ class Ruper:
             a, b, c = self.vertices[tri[0]], self.vertices[tri[1]], self.vertices[tri[2]]
             u = (a + b + c) / 3.0
             rmBool = False
+#            self.Show(debug = True)
+#            plt.plot(u[0], u[1], 'bo')
+#            plt.show()
+#            plt.clf()
             for delta in [-1e-9, 0, 1e-9]:
                 v = np.array([1e5, u[1] + delta])
                 count = self.CrossCount(u, v)
@@ -253,7 +260,7 @@ class Ruper:
                 rmKeys.append(tuple(sorted((tri[0], tri[1], tri[2]))))
         for tri in rmKeys:
             self.DelTriangle(tri[0], tri[1], tri[2])
-
+        
     def InitializeTriangleQueue(self):
         self.queueT = deque()
         for tri in self.delaunay_triangles:
@@ -275,6 +282,8 @@ class Ruper:
 
     def InsertCircleCenter(self, a, b, c):
         o = GetCircCenter(a, b, c)
+        if o == None:
+            return
         self.vertices.append(o)
         self.UpdateTriangulate()
         encroachedSegments = []
@@ -300,16 +309,20 @@ class Ruper:
 
     def Start(self):
         self.Triangulate()
+        print 't'
+        self.Show()
         self.InitializeSegmentQueue()
         self.InitializeTriangleQueue()
         self.EliminateSegment()
+        print 'e'
+        self.Show()
         self.RemoveOutside()
+        self.Show()
         self.InitializeTriangleQueue()
         self.EliminateAngle()
 
-
 if __name__ == '__main__':
-    planar = triangle.get_data('A') 
+    planar = triangle.get_data('key')
     planar['segments_type'] = {}
     for segment in planar['segments']:
         a, b = sorted((segment[0], segment[1]))
