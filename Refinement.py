@@ -1,4 +1,3 @@
-import triangle
 from triangle.plot import plot
 from cgalgo import *
 import numpy as np
