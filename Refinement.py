@@ -23,6 +23,8 @@ class Ruper:
         self.segments_vertices = {}
         self.vertices_segments = {}
         self.delaunay_triangles = {}
+        self.deled_Triangle = []
+        self.added_Triangle = []
 
         for tri in delaunay['triangles']:
             for ind in range(3):
@@ -73,13 +75,14 @@ class Ruper:
             if sgn(cross(self.vertices[p], self.vertices[a], self.vertices[b])) == 0:
                 self.DelTriangle(p, a, b)
             return
-#        self.Show()
-#        plt.plot(self.vertices[-1][0], self.vertices[-1][1], 'yo')
-#        plt.plot(self.vertices[a][0], self.vertices[a][1], 'bo')
-#        plt.plot(self.vertices[b][0], self.vertices[b][1], 'bo')
-#        plt.plot(self.vertices[x][0], self.vertices[x][1], 'go')
-#        plt.show()
-#        plt.clf()
+#        if self.state == 'angle':
+#            self.Show()
+#            plt.plot(self.vertices[-1][0], self.vertices[-1][1], 'yo')
+#            plt.plot(self.vertices[a][0], self.vertices[a][1], 'bo')
+#            plt.plot(self.vertices[b][0], self.vertices[b][1], 'bo')
+#            plt.plot(self.vertices[x][0], self.vertices[x][1], 'go')
+#            plt.show()
+#            plt.clf()
         if InCircle(self.vertices[p], self.vertices[a], self.vertices[b], self.vertices[x]):
             self.DelTriangle(p, a, b)
             self.DelTriangle(a, b, x)
@@ -181,6 +184,10 @@ class Ruper:
         skinnyTriangles = []
         encroachedSegments += self.CheckEncroachedSegments(self.added_Triangle)
         encroachedSegments += self.CheckEncroachedSegments(self.deled_Triangle)
+        if self.IsEncroached([segment[0], cnt]):
+            encroachedSegments.append([segment[0], cnt])
+        if self.IsEncroached([segment[1], cnt]):
+            encroachedSegments.append([segment[1], cnt])
 #        skinnyTriangles += self.CheckSkinnyTriangles(self.added_Triangle)
 #        skinnyTriangles += self.CheckSkinnyTriangles(self.deled_Triangle)
         for segment in encroachedSegments:
@@ -216,8 +223,6 @@ class Ruper:
     def EliminateSegment(self):
         while len(self.queueS) > 0:
             segment = self.queueS.popleft()
-            self.Show()
-            print segment
             if self.IsEncroached(segment):
                 self.SplitSegment(segment)
 
@@ -246,8 +251,8 @@ class Ruper:
                     rmBool = True
             if rmBool == True:
                 rmKeys.append(tuple(sorted((tri[0], tri[1], tri[2]))))
-        for rm in rmKeys:
-            self.delaunay_triangles.pop(rm)
+        for tri in rmKeys:
+            self.DelTriangle(tri[0], tri[1], tri[2])
 
     def InitializeTriangleQueue(self):
         self.queueT = deque()
@@ -261,9 +266,11 @@ class Ruper:
         self.added_Triangle = []
         self.deled_Triangle = []
         for tri in delTriangles:
-            self.AddTriangle(tri[0], tri[1], tri[2])
+            if self.delaunay_triangles.has_key(tuple(sorted((tri[0], tri[1], tri[2])))) == False:
+                self.AddTriangle(tri[0], tri[1], tri[2])
         for tri in addTriangles:
-            self.DelTriangle(tri[0], tri[1], tri[2])
+            if self.delaunay_triangles.has_key(tuple(sorted((tri[0], tri[1], tri[2])))) == True:
+                self.DelTriangle(tri[0], tri[1], tri[2])
         self.vertices.pop()
 
     def InsertCircleCenter(self, a, b, c):
@@ -294,15 +301,15 @@ class Ruper:
     def Start(self):
         self.Triangulate()
         self.InitializeSegmentQueue()
-#        self.InitializeTriangleQueue()
+        self.InitializeTriangleQueue()
         self.EliminateSegment()
-#        self.RemoveOutside()
-#        self.InitializeTriangleQueue()
-#        self.EliminateAngle()
+        self.RemoveOutside()
+        self.InitializeTriangleQueue()
+        self.EliminateAngle()
 
 
 if __name__ == '__main__':
-    planar = triangle.get_data('face') 
+    planar = triangle.get_data('A') 
     planar['segments_type'] = {}
     for segment in planar['segments']:
         a, b = sorted((segment[0], segment[1]))
@@ -310,6 +317,6 @@ if __name__ == '__main__':
     ruper = Ruper(planar)
     now = time.time()
     ruper.Start()
-#    print time.time() - now
+    print time.time() - now
     ruper.Show()
     
