@@ -189,12 +189,12 @@ class Ruper:
             encroachedSegments.append([segment[0], cnt])
         if self.IsEncroached([segment[1], cnt]):
             encroachedSegments.append([segment[1], cnt])
-#        skinnyTriangles += self.CheckSkinnyTriangles(self.added_Triangle)
-#        skinnyTriangles += self.CheckSkinnyTriangles(self.deled_Triangle)
+        skinnyTriangles += self.CheckSkinnyTriangles(self.added_Triangle)
+        skinnyTriangles += self.CheckSkinnyTriangles(self.deled_Triangle)
         for segment in encroachedSegments:
             self.queueS.append(segment)
-#        for tri in skinnyTriangles:
-#            self.queueT.append(tri)
+        for tri in skinnyTriangles:
+            self.queueT.append(tri)
 
     def IsSkinny(self, tri):
         if self.delaunay_triangles.has_key(tuple(sorted((tri[0], tri[1], tri[2])))) == False:
@@ -309,12 +309,10 @@ class Ruper:
 
     def Start(self):
         self.Triangulate()
-        print 't'
         self.Show()
         self.InitializeSegmentQueue()
         self.InitializeTriangleQueue()
         self.EliminateSegment()
-        print 'e'
         self.Show()
         self.RemoveOutside()
         self.Show()
@@ -322,7 +320,7 @@ class Ruper:
         self.EliminateAngle()
 
 if __name__ == '__main__':
-    planar = triangle.get_data('key')
+    planar = triangle.get_data('double_hex')
     planar['segments_type'] = {}
     for segment in planar['segments']:
         a, b = sorted((segment[0], segment[1]))
