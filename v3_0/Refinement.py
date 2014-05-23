@@ -229,7 +229,6 @@ class Ruper:
             if self.IsEncroached(segment):
                 self.SplitSegment(segment)
 
-
     def CrossCount(self, u, v):
         count = 0
         for segment in self.segments:
@@ -320,7 +319,7 @@ class Ruper:
         self.EliminateAngle()
 
 if __name__ == '__main__':
-    planar = triangle.get_data('double_hex')
+    planar = triangle.get_data('A')
     planar['segments_type'] = {}
     for segment in planar['segments']:
         a, b = sorted((segment[0], segment[1]))
