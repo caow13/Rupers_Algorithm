@@ -60,6 +60,12 @@ class Ruper:
             if self.IsEncroached(segment):
                 self.queueS.append(segment)
 
+    def InitializeTriangleQueue(self):
+        self.queueT.clear()
+        for triangle in self.triangles:
+            if self.IsSkinny(triangle):
+                self.queueT.append(triangle)
+
     def BruteForcePointLocation(self, vp):
         for triangle in self.triangles:
             va, vb, vc = self.vertices[triangle[0]], self.vertices[triangle[1]], self.vertices[triangle[2]]
@@ -143,6 +149,21 @@ class Ruper:
                 return True
         return False
 
+    def IsSkinny(self, triangle):
+        print triangle
+        triangleKey = self.GetTriangleKey(triangle)
+        if self.triangles.has_key(triangleKey) == False:
+            return False
+        va, vb, vc = self.vertices[triangle[0]], self.vertices[triangle[1]], self.vertices[triangle[2]]
+        vo = GetCircCenter(va, vb, vc)
+        if vo == None:
+            return True
+        r = GetDistance(va, vo)
+        d = np.min((GetDistance(va, vb), GetDistance(vb, vc), GetDistance(va, vc)))
+        if sgn(r / d - np.sqrt(2)) > 0:
+            return True
+        return False
+
     def RightSide(self, p, a, b):
         segmentKey = self.GetSegmentKey((a, b))
         if self.svRelation.has_key(segmentKey) == False or len(self.svRelation[segmentKey]) == 0:
@@ -187,14 +208,21 @@ class Ruper:
         self.SwapTest(p, a, b, c)
 
 
-    def GetEncroachedS(self, triangeList):
+    def GetEncroachedS(self, triangleList):
         encroachedS = []
-        for triangle in triangeList:
+        for triangle in triangleList:
             for ind in range(3):
                 a, b = triangle[0][ind], triangle[0][(ind + 1) % 3]
                 if self.IsEncroached((a, b)):
                     encroachedS.append((a, b))
         return encroachedS
+
+    def GetSkinnyTriangles(self, triangleList):
+        skinnyT = []
+        for triangle in triangleList:
+            if self.IsSkinny(triangle[0]):
+                skinnyT.append(triangle[0])
+        return skinnyT
 
     def SplitSegment(self, segment):
         va = self.vertices[segment[0]]
@@ -223,11 +251,39 @@ class Ruper:
             encroachedS.append((segment[0], count))
         if self.IsEncroached((segment[1], count)) == True:
             encroachedS.append((segment[1], count))
+        
+        for segment in encroachedS:
+            self.queueS.append(segment)
+
+        self.os.AddEncroachedSegments(encroachedS)
+        
+        if self.stage == 3:
+            skinnyT = self.GetSkinnyTriangles()
+            for triangle in skinnyT:
+                self.queueT.append(triangle)
+
+        
+    def InsertCircleCenter(self, triangle):
+        va, vb, vc = self.vertices[triangle[0]], self.vertices[triangle[1]], self.vertices[triangle[2]]
+        vo = GetCircCenter(va, vb, vc)
+        if vo == None:
+            return
+        self.AddVertex(vo)
+        self.UpdateDelaunay()
+        encroachedS = self.GetEncroachedS(self.checkedTriangles)
 
         self.os.AddEncroachedSegments(encroachedS)
 
-        for segment in encroachedS:
-            self.queueS.append(segment)
+        if len(encroachedS) > 0:
+            self.os.operation = 2
+            self.RecoverTriangles()
+            for segment in encroachedS:
+                self.queueS.append(segment)
+        else:
+            skinnyT = self.GetSkinnyTriangles(self.checkedTriangles)
+            for triangle in skinnyT:
+                self.queueT.append(triangle)
+        
 
     def EliminateSegment(self):
         while len(self.queueS) > 0:
@@ -236,6 +292,39 @@ class Ruper:
                 self.SplitSegment(segment)
                 return True
         return False
+
+    def EliminateAngle(self):
+        while len(self.queueT) > 0:
+            triangle = self.queueT.popleft()
+            if self.IsSkinny(triangle):
+                self.InsertCircleCenter(triangle)
+
+    def CrossCount(self, u, v):
+        count = 0
+        for segment in self.segments:
+            va, vb = self.vertices[segment[0]], self.vertices[segment[1]]
+            state = GetSegIntersection(va, vb, u, v)
+            if state == None:
+                return None
+            if state == True:
+                count += self.segmentsMark[self.GetSegmentKey(segment)]
+        return count
+
+    def RemoveOutside(self):
+        rmTriangles = []
+        for triangle in self.triangles:
+            va, vb, vc = self.vertices[triangle[0]], self.vertices[triangle[1]], self.vertices[triangle[2]]
+            u = (va + vb + vc) / 3.0
+            rm = False
+            for delta in (-1e-9, 0, 1e-9):
+                v = np.array([1e5, u[1] + delta])
+                count = self.CrossCount(u, v)
+                if count != None and count % 2 == 0:
+                    rm = True
+            if rm == True:
+                rmTriangles.append(self.GetTriangleKey(triangle))
+        for triangle in rmTriangles:
+            self.DelTriangle(triangle)
 
     def NextStep(self):
         print 'proccessing stage %d' % self.stage
@@ -249,7 +338,13 @@ class Ruper:
             if self.EliminateSegment() == False:
                 self.stage += 1
         elif self.stage == 2:
-            self.os = OperationSequence(
+            self.os = OperationSequence(3)
+            self.RemoveOutside()
+            self.stage += 1
+            self.InitializeTriangleQueue()
+        elif self.stage == 3:
+            self.os = OperationSequence(1)
+            self.EliminateAngle()
         return self.os
     
     def Show(self):
@@ -262,7 +357,7 @@ class Ruper:
 
 
 if __name__ == '__main__':
-    planar = triPackage.get_data('af2')
+    planar = triPackage.get_data('A')
     vertices = []
     segments = []
     segmentsMark = []
@@ -272,6 +367,6 @@ if __name__ == '__main__':
         segments.append((segment[0], segment[1]))
         segmentsMark.append(((segment[0], segment[1]), 1))
     ruper = Ruper(vertices, segments, segmentsMark)
-    while ruper.stage != 2:
+    while ruper.stage != 4:
         os = ruper.NextStep()
     

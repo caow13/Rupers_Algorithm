@@ -4,6 +4,7 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
+AddEncroachedSegments	.\Ruper.py	/^    def AddEncroachedSegments(self, segmentList):$/;"	m	class:OperationSequence	access:public
 AddFlipSequence	.\Ruper.py	/^    def AddFlipSequence(self, flip):$/;"	m	class:OperationSequence	access:public
 AddSegment	.\Ruper.py	/^    def AddSegment(self, segment):$/;"	m	class:Ruper	access:public
 AddSegmentMark	.\Ruper.py	/^    def AddSegmentMark(self, segment, mark):$/;"	m	class:Ruper	access:public
@@ -11,10 +12,12 @@ AddTriangle	.\Ruper.py	/^    def AddTriangle(self, triangle):$/;"	m	class:Ruper	
 AddVertex	.\Ruper.py	/^    def AddVertex(self, vertex):$/;"	m	class:OperationSequence	access:public
 AddVertex	.\Ruper.py	/^    def AddVertex(self, vertex):$/;"	m	class:Ruper	access:public
 BruteForcePointLocation	.\Ruper.py	/^    def BruteForcePointLocation(self, vp):$/;"	m	class:Ruper	access:public
+CrossCount	.\Ruper.py	/^    def CrossCount(self, u, v):$/;"	m	class:Ruper	access:public
 DelSegment	.\Ruper.py	/^    def DelSegment(self, segment):$/;"	m	class:Ruper	access:public
 DelSegmentMark	.\Ruper.py	/^    def DelSegmentMark(self, segment):$/;"	m	class:Ruper	access:public
 DelTriangle	.\Ruper.py	/^    def DelTriangle(self, triangle):$/;"	m	class:Ruper	access:public
 DelVertex	.\Ruper.py	/^    def DelVertex(self, vertex):$/;"	m	class:Ruper	access:public
+EliminateAngle	.\Ruper.py	/^    def EliminateAngle(self):$/;"	m	class:Ruper	access:public
 EliminateSegment	.\Ruper.py	/^    def EliminateSegment(self):$/;"	m	class:Ruper	access:public
 GetBisector	.\cgalgo.py	/^def GetBisector(u, v):$/;"	f	access:public
 GetCircCenter	.\cgalgo.py	/^def GetCircCenter(a, b, c):$/;"	f	access:public
@@ -30,13 +33,16 @@ Initialize	.\Show.py	/^    def Initialize(fileName):$/;"	m	class:Show	access:pub
 InitializeDelaunay	.\Ruper.py	/^    def InitializeDelaunay(self):$/;"	m	class:Ruper	access:public
 InitializeParameter	.\Ruper.py	/^    def InitializeParameter(self):$/;"	m	class:Ruper	access:public
 InitializeSegmentQueue	.\Ruper.py	/^    def InitializeSegmentQueue(self):$/;"	m	class:Ruper	access:public
+InitializeTriangleQueue	.\Ruper.py	/^    def InitializeTriangleQueue(self):$/;"	m	class:Ruper	access:public
 InsertSV	.\Ruper.py	/^    def InsertSV(self, segment, vertex):$/;"	m	class:Ruper	access:public
 InsertVS	.\Ruper.py	/^    def InsertVS(self, vertex, segment):$/;"	m	class:Ruper	access:public
 IsEncroached	.\Ruper.py	/^    def IsEncroached(self, segment):$/;"	m	class:Ruper	access:public
+IsSkinny	.\Ruper.py	/^    def IsSkinny(self, triangle):$/;"	m	class:Ruper	access:public
 KeyBoard	.\TestOpenGL.py	/^    def KeyBoard(self, key, x, y):$/;"	m	class:Show	access:public
 LoadData	.\TestOpenGL.py	/^    def LoadData(self, fileName):$/;"	m	class:Show	access:public
 NextStep	.\Ruper.py	/^    def NextStep(self):$/;"	m	class:Ruper	access:public
 OperationSequence	.\Ruper.py	/^class OperationSequence:$/;"	c	inherits:
+RemoveOutside	.\Ruper.py	/^    def RemoveOutside(self):$/;"	m	class:Ruper	access:public
 RemoveSV	.\Ruper.py	/^    def RemoveSV(self, segment, vertex):$/;"	m	class:Ruper	access:public
 RemoveVS	.\Ruper.py	/^    def RemoveVS(self, vertex, segment):$/;"	m	class:Ruper	access:public
 RightSide	.\Ruper.py	/^    def RightSide(self, p, a, b):$/;"	m	class:Ruper	access:public
@@ -69,7 +75,7 @@ np	.\Ruper.py	/^import numpy as np$/;"	i
 np	.\Show.py	/^import numpy as np$/;"	i
 np	.\TestOpenGL.py	/^import numpy as np$/;"	i
 np	.\cgalgo.py	/^import numpy as np$/;"	i
-planar	.\Ruper.py	/^    planar = triPackage.get_data('guitar')$/;"	v	class:Ruper
+planar	.\Ruper.py	/^    planar = triPackage.get_data('A')$/;"	v	class:Ruper
 plot	.\Ruper.py	/^from triangle.plot import plot$/;"	i
 plt	.\Ruper.py	/^import matplotlib.pyplot as plt$/;"	i
 ruper	.\Ruper.py	/^    ruper = Ruper(vertices, segments, segmentsMark)$/;"	v	class:Ruper
@@ -77,7 +83,7 @@ segments	.\Ruper.py	/^    segments = []$/;"	v	class:Ruper
 segmentsMark	.\Ruper.py	/^    segmentsMark = []$/;"	v	class:Ruper
 sgn	.\cgalgo.py	/^def sgn(x):$/;"	f	access:public
 show	.\Show.py	/^    show = Show()$/;"	v
-show	.\TestOpenGL.py	/^    show = Show('face')$/;"	v	class:Show
+show	.\TestOpenGL.py	/^    show = Show('A')$/;"	v	class:Show
 triPackage	.\Ruper.py	/^import triangle as triPackage$/;"	i
 triPackage	.\Show.py	/^import triangle as triPackage$/;"	i
 triPackage	.\TestOpenGL.py	/^import triangle as triPackage$/;"	i

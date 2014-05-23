@@ -29,7 +29,7 @@ class Show:
         glutInit()
         glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB)
         glutInitWindowPosition(100, 100)
-        glutInitWindowSize(800, 800)
+        glutInitWindowSize(400, 400)
         glutCreateWindow("Ruper")
         glutDisplayFunc(self.drawFunc)
         glutKeyboardFunc(self.KeyBoard)
@@ -44,17 +44,12 @@ class Show:
             else:
                 if len(self.os.flipSequence) == 0:
                     self.encroachedS = self.os.encroachedS
-                    print 'empty: ', self.encroachedS
                     glutPostRedisplay()
-                    print 'end'
                 else:
                     self.flip = self.os.flipSequence[0]
-                    print self.os.flipSequence
                     glutPostRedisplay()
 
     def drawFunc(self):
-        if self.os != None:
-            print self.os.flipSequence
         max_x = reduce(lambda u, v : u if u[0] > v[0] else v, self.ruper.vertices)[0]
         min_x = reduce(lambda u, v : u if u[0] < v[0] else v, self.ruper.vertices)[0]
         max_y = reduce(lambda u, v : u if u[1] > v[1] else v, self.ruper.vertices)[1]
@@ -91,6 +86,9 @@ class Show:
             glVertex2f(Scale(vc[0], mid_x, span), Scale(vc[1], mid_y, span))
         glEnd()
         if self.os != None and self.os.operation == 0:
+            if self.os.vertex == None:
+                self.os = None
+                return
             glPointSize(5)
             glColor3f(1.0, 0.0, 1.0)
             glBegin(GL_POINTS)
@@ -127,7 +125,7 @@ class Show:
                 glEnd()
                         
         if self.os != None:
-            if len(self.os.flipSequence):
+            if len(self.os.flipSequence) > 0:
                 self.os.flipSequence = self.os.flipSequence[1:]
             else:
                 self.os = None
@@ -135,5 +133,5 @@ class Show:
         glFlush()
 
 if __name__ == '__main__':
-    show = Show('af2')
+    show = Show('A')
     show.Show()
