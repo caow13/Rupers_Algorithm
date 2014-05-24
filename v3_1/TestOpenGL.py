@@ -133,5 +133,5 @@ class Show:
         glFlush()
 
 if __name__ == '__main__':
-    show = Show('A')
+    show = Show('guitar')
     show.Show()
