@@ -10,6 +10,7 @@ class OperationSequence:
         self.operation = operation
         self.flipSequence = []
         self.encroachedS = []
+        self.locationSequence = []
 
     def SplitSegment(self, segment):
         self.segment = segment
@@ -25,6 +26,7 @@ class OperationSequence:
 
     def AddTriangle(self, triangle):
         self.triangle = triangle
+
 
 class Ruper:
     def __init__(self, vertices, segments, segmentsMark):
@@ -73,6 +75,27 @@ class Ruper:
             va, vb, vc = self.vertices[triangle[0]], self.vertices[triangle[1]], self.vertices[triangle[2]]
             if InTriangle(vp, va, vb, vc):
                 return triangle
+
+    def TrianglePointLocation(self, curTriangle, vp):
+        va, vb, vc = self.vertices[curTriangle[0]], self.vertices[curTriangle[1]], self.vertices[curTriangle[2]] 
+        vg = (va + vb + vc) / 3.0
+        lastSeg = None
+        while True:
+            self.os.locationSequence.append(curTriangle)
+            va, vb, vc = self.vertices[curTriangle[0]], self.vertices[curTriangle[1]], self.vertices[curTriangle[2]] 
+            if InTriangle(vp, va, vb, vc):
+                return curTriangle
+            for ind in range(3):
+                if lastSeg != None and self.GetSegmentKey((curTriangle[ind], curTriangle[(ind + 1) % 3])) == self.GetSegmentKey(lastSeg):
+                    continue
+                va, vb = self.vertices[curTriangle[ind]], self.vertices[curTriangle[(ind + 1) % 3]]
+                if GetSegIntersection(va, vb, vg, vp) == True:
+                    x = self.RightSide(curTriangle[(ind + 2) % 3], curTriangle[ind], curTriangle[(ind + 1) % 3])
+                    lastSeg = (curTriangle[ind], curTriangle[(ind + 1) % 3])
+                    curTriangle = (curTriangle[ind], curTriangle[(ind + 1) % 3], x)
+                    break
+
+
 
     def GetSegmentKey(self, segment):
         return tuple(sorted((segment[0], segment[1])))
@@ -211,10 +234,14 @@ class Ruper:
                     self.DelTriangle(triangle[0])
         self.DelVertex()
 
-    def UpdateDelaunay(self):
+    def UpdateDelaunay(self, curTriangle = None):
         self.checkedTriangles = []
         p = len(self.vertices) - 1
-        triangle = self.BruteForcePointLocation(self.vertices[p])
+        if curTriangle == None:
+            triangle = self.BruteForcePointLocation(self.vertices[p])
+        else:
+            triangle = self.TrianglePointLocation(curTriangle, self.vertices[p])
+            print 'location result:', triangle, self.BruteForcePointLocation(self.vertices[p])
         a, b, c = triangle[0], triangle[1], triangle[2]
         self.DelTriangle((a, b, c))
         self.AddTriangle((p, a, b))
@@ -284,11 +311,13 @@ class Ruper:
         if vo == None:
             return
 
+        self.AddVertex(vo)
+
         self.os = OperationSequence('insert')
         self.os.AddVertex(vo)
         self.os.AddTriangle(triangle)
 
-        self.UpdateDelaunay()
+        self.UpdateDelaunay(triangle)
         encroachedS = self.GetEncroachedS(self.checkedTriangles)
 
         self.os.AddEncroachedSegments(encroachedS)
@@ -317,8 +346,7 @@ class Ruper:
         while len(self.queueS) > 0:
             segment = self.queueS.popleft()
             if len(self.queueE) > 0:
-                if self.queueE.popleft() != segment:
-                    print 'holy shit!!!!!!!!!!!!!!!!!!'
+                self.queueE.popleft()
                 if self.segments.has_key(self.GetSegmentKey(segment)) == True:
                     self.SplitSegment(segment)
                     return True
@@ -344,6 +372,7 @@ class Ruper:
         return count
 
     def RemoveOutside(self):
+        self.os = OperationSequence('remove')
         rmTriangles = []
         for triangle in self.triangles:
             va, vb, vc = self.vertices[triangle[0]], self.vertices[triangle[1]], self.vertices[triangle[2]]
@@ -381,7 +410,30 @@ class Ruper:
                 self.stage += 1
         else:
             self.FinishGenerating()
+        self.ShowOS(self.os)
+#        self.Show()
         return self.os
+
+    def ShowOS(self, os):
+        if os == None:
+            print 'None'
+        elif os.operation == 'split':
+            print 'split'
+            print os.vertex
+            print os.segment
+            print os.flipSequence
+            print os.encroachedS
+        elif os.operation == 'insert':
+            print 'insert'
+            print os.triangle
+            print os.vertex
+            print os.flipSequence
+            print os.encroachedS
+            print 'location sequence: ', os.locationSequence
+        elif os.operation == 'remove':
+            print 'remove'
+        else:
+            print os.operation
     
     def Show(self):
         planar = {'vertices' : np.array(self.vertices), 'segments' : np.array(self.segments.keys())}
@@ -394,7 +446,7 @@ class Ruper:
 
 
 if __name__ == '__main__':
-    planar = triPackage.get_data('key')
+    planar = triPackage.get_data('happy')
     vertices = []
     segments = []
     segmentsMark = []
