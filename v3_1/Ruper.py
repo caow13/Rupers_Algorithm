@@ -7,11 +7,8 @@ from collections import deque
 
 class OperationSequence:
     def __init__(self, operation):
-        #-1 - Initialization 0 - Add a mid point, 1 - Successfully add a circle center 2 - Unsuccessfully add a circle center 3 - RemoveOutside
         self.operation = operation
         self.flipSequence = []
-        self.vertex = None
-        self.segment = None
         self.encroachedS = []
 
     def SplitSegment(self, segment):
@@ -25,6 +22,9 @@ class OperationSequence:
 
     def AddFlipSequence(self, flip):
         self.flipSequence.append(flip)
+
+    def AddTriangle(self, triangle):
+        self.triangle = triangle
 
 class Ruper:
     def __init__(self, vertices, segments, segmentsMark):
@@ -43,12 +43,14 @@ class Ruper:
         self.stage = 0
         self.queueS = deque()
         self.queueT = deque()
+        self.queueE = deque()
         self.triangles = {}
         self.svRelation = {}
         self.vsRelation = {}
         self.checkedTriangles = []
 
     def InitializeDelaunay(self):
+        self.os = OperationSequence('init')
         delaunay = triPackage.triangulate({'vertices' : self.vertices}) #the usage of delaunay need pass the vertices
         for triangle in delaunay['triangles']:
             self.AddTriangle(triangle)
@@ -116,7 +118,7 @@ class Ruper:
             self.InsertSV((a, b), c)
             self.InsertVS(a, (b, c))
 
-    def DelVertex(self, vertex):
+    def DelVertex(self):
         self.vertices.pop()
 
     def DelSegment(self, segment):
@@ -127,6 +129,8 @@ class Ruper:
 
     def DelTriangle(self, triangle):
         triangleKey = self.GetTriangleKey(triangle)
+        if self.triangles.has_key(triangleKey) == False:
+            return
         self.triangles.pop(triangleKey)
         self.checkedTriangles.append((triangle, -1))
         for ind in range(3):
@@ -150,7 +154,6 @@ class Ruper:
         return False
 
     def IsSkinny(self, triangle):
-        print triangle
         triangleKey = self.GetTriangleKey(triangle)
         if self.triangles.has_key(triangleKey) == False:
             return False
@@ -196,6 +199,18 @@ class Ruper:
         self.STest(p, b, c)
         self.STest(p, c, a)
 
+    def RecoverTriangles(self):
+        checkedTriangles = self.checkedTriangles[:]
+        checkedTriangles.reverse()
+        for triangle in checkedTriangles:
+            if triangle[1] == -1:
+                if self.triangles.has_key(self.GetTriangleKey(triangle[0])) == False:
+                    self.AddTriangle(triangle[0])
+            else:
+                if self.triangles.has_key(self.GetTriangleKey(triangle[0])) == True:
+                    self.DelTriangle(triangle[0])
+        self.DelVertex()
+
     def UpdateDelaunay(self):
         self.checkedTriangles = []
         p = len(self.vertices) - 1
@@ -206,7 +221,6 @@ class Ruper:
         self.AddTriangle((p, b, c))
         self.AddTriangle((p, c, a))
         self.SwapTest(p, a, b, c)
-
 
     def GetEncroachedS(self, triangleList):
         encroachedS = []
@@ -225,11 +239,14 @@ class Ruper:
         return skinnyT
 
     def SplitSegment(self, segment):
+        self.os = OperationSequence('split')
+
         va = self.vertices[segment[0]]
         vb = self.vertices[segment[1]]
         vm = (va + vb) * 0.5
         count = len(self.vertices)
 
+        self.os.SplitSegment(segment)
         self.AddVertex(vm)
 
         self.os.AddVertex(vm)
@@ -237,8 +254,6 @@ class Ruper:
         self.DelSegment(segment)
         self.AddSegment((segment[0], count))
         self.AddSegment((segment[1], count))
-
-        self.os.SplitSegment(segment)
 
         segmentMark = self.DelSegmentMark(segment)
         self.AddSegmentMark((segment[0], count), segmentMark)
@@ -258,7 +273,7 @@ class Ruper:
         self.os.AddEncroachedSegments(encroachedS)
         
         if self.stage == 3:
-            skinnyT = self.GetSkinnyTriangles()
+            skinnyT = self.GetSkinnyTriangles(self.checkedTriangles)
             for triangle in skinnyT:
                 self.queueT.append(triangle)
 
@@ -268,17 +283,22 @@ class Ruper:
         vo = GetCircCenter(va, vb, vc)
         if vo == None:
             return
-        self.AddVertex(vo)
+
+        self.os = OperationSequence('insert')
+        self.os.AddVertex(vo)
+        self.os.AddTriangle(triangle)
+
         self.UpdateDelaunay()
         encroachedS = self.GetEncroachedS(self.checkedTriangles)
 
         self.os.AddEncroachedSegments(encroachedS)
 
         if len(encroachedS) > 0:
-            self.os.operation = 2
             self.RecoverTriangles()
+            self.queueE.clear()
             for segment in encroachedS:
-                self.queueS.append(segment)
+               self.queueS.append(segment)
+               self.queueE.append(segment)
         else:
             skinnyT = self.GetSkinnyTriangles(self.checkedTriangles)
             for triangle in skinnyT:
@@ -294,10 +314,23 @@ class Ruper:
         return False
 
     def EliminateAngle(self):
+        while len(self.queueS) > 0:
+            segment = self.queueS.popleft()
+            if len(self.queueE) > 0:
+                if self.queueE.popleft() != segment:
+                    print 'holy shit!!!!!!!!!!!!!!!!!!'
+                if self.segments.has_key(self.GetSegmentKey(segment)) == True:
+                    self.SplitSegment(segment)
+                    return True
+            elif self.IsEncroached(segment):
+                self.SplitSegment(segment)
+                return True
         while len(self.queueT) > 0:
             triangle = self.queueT.popleft()
             if self.IsSkinny(triangle):
                 self.InsertCircleCenter(triangle)
+                return True
+        return False
 
     def CrossCount(self, u, v):
         count = 0
@@ -326,25 +359,28 @@ class Ruper:
         for triangle in rmTriangles:
             self.DelTriangle(triangle)
 
+    def FinishGenerating(self):
+        self.os.operation = OperationSequence('finish')
+
     def NextStep(self):
         print 'proccessing stage %d' % self.stage
+        self.os = None
         if self.stage == 0:
-            self.os = OperationSequence(-1)
             self.InitializeDelaunay()
-            self.InitializeSegmentQueue()
             self.stage += 1        
+            self.InitializeSegmentQueue()
         elif self.stage == 1:
-            self.os = OperationSequence(0)
             if self.EliminateSegment() == False:
                 self.stage += 1
         elif self.stage == 2:
-            self.os = OperationSequence(3)
             self.RemoveOutside()
             self.stage += 1
             self.InitializeTriangleQueue()
         elif self.stage == 3:
-            self.os = OperationSequence(1)
-            self.EliminateAngle()
+            if self.EliminateAngle() == False:
+                self.stage += 1
+        else:
+            self.FinishGenerating()
         return self.os
     
     def Show(self):
@@ -352,12 +388,13 @@ class Ruper:
         tri = {'vertices' : np.array(self.vertices), 'triangles' : np.array(self.triangles.keys())}
         plot(plt.axes(), **planar)
         plot(plt.axes(), **tri)
+        plt.plot(self.vertices[-1][0], self.vertices[-1][1], 'bo')
         plt.show()
         plt.clf()
 
 
 if __name__ == '__main__':
-    planar = triPackage.get_data('A')
+    planar = triPackage.get_data('key')
     vertices = []
     segments = []
     segmentsMark = []
@@ -369,4 +406,5 @@ if __name__ == '__main__':
     ruper = Ruper(vertices, segments, segmentsMark)
     while ruper.stage != 4:
         os = ruper.NextStep()
+    ruper.Show()
     

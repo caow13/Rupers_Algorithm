@@ -85,7 +85,7 @@ class Show:
             glVertex2f(Scale(vb[0], mid_x, span), Scale(vb[1], mid_y, span))
             glVertex2f(Scale(vc[0], mid_x, span), Scale(vc[1], mid_y, span))
         glEnd()
-        if self.os != None and self.os.operation == 0:
+        if self.os != None and self.os.operation == 'split':
             if self.os.vertex == None:
                 self.os = None
                 return
@@ -133,5 +133,5 @@ class Show:
         glFlush()
 
 if __name__ == '__main__':
-    show = Show('A')
+    show = Show('layers')
     show.Show()

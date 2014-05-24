@@ -319,7 +319,7 @@ class Ruper:
         self.EliminateAngle()
 
 if __name__ == '__main__':
-    planar = triangle.get_data('face')
+    planar = triangle.get_data('layers')
     planar['segments_type'] = {}
     for segment in planar['segments']:
         a, b = sorted((segment[0], segment[1]))
