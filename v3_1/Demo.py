@@ -6,6 +6,8 @@ from OpenGL.GL.ARB.vertex_buffer_object import *
 import numpy
 import math
 
+from Ruper import *
+
 class DisplayWidget(QGLWidget):
     def __init__(self, parent):
         QGLWidget.__init__(self, parent)
@@ -16,6 +18,8 @@ class DisplayWidget(QGLWidget):
         self.tmp_offset_x = 0.0
         self.tmp_offset_y = 0.0
         self.scale = 1.0
+
+        self.ruper = None
 
     def initializeGL(self):
         glClearColor(0.0, 0.0, 0.0, 1.0)
@@ -73,15 +77,13 @@ void main()
         self.uniform_h = glGetUniformLocation(self.program, "h")
 
         self.vbo = glGenBuffers(1)
-        self.data = numpy.zeros((10000, 2), dtype=numpy.float32)
-        self.data[:,0] = numpy.linspace(-0.5, 0.5, len(self.data))
-        for i in xrange(10000):
-            self.data[i, 1] = math.sin(180.0 / 3.14 * self.data[i, 0])
-        glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
-        glBufferData(GL_ARRAY_BUFFER, 8 * len(self.data), self.data, GL_STATIC_DRAW)
+        self.vbo2 = glGenBuffers(1)
+        self.vbo3 = glGenBuffers(1)
 
         glEnable(GL_POINT_SMOOTH)
-        glPointSize(6.0)
+        glPointSize(8.0)
+        glEnable(GL_LINE_SMOOTH)
+        glLineWidth(1.0)
 
     def resizeGL(self, w, h):
         glViewport(0, 0, w, h)
@@ -92,21 +94,34 @@ void main()
     def paintGL(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-        glUseProgram(self.program)
+        if self.ruper != None:
+            glUseProgram(self.program)
 
-        glUniform1f(self.uniform_scale, self.scale)
-        glUniform1f(self.uniform_w, self.w)
-        glUniform1f(self.uniform_h, self.h)
-        glUniform1f(self.uniform_offset_x, self.offset_x + self.tmp_offset_x)
-        glUniform1f(self.uniform_offset_y, self.offset_y + self.tmp_offset_y)
+            glUniform1f(self.uniform_scale, self.scale)
+            glUniform1f(self.uniform_w, self.w)
+            glUniform1f(self.uniform_h, self.h)
+            glUniform1f(self.uniform_offset_x, self.offset_x + self.tmp_offset_x)
+            glUniform1f(self.uniform_offset_y, self.offset_y + self.tmp_offset_y)
 
-        glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
-        glEnableVertexAttribArray(self.attrib)
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, None)
+            data = np.array(self.ruper.vertices, dtype='float32')
+            glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
+            glBufferData(GL_ARRAY_BUFFER, 8 * len(data), data, GL_STATIC_DRAW)
+            glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
+            glEnableVertexAttribArray(self.attrib)
+            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, None)
+            glDrawArrays(GL_POINTS, 0, len(data))
 
-        glDrawArrays(GL_LINE_STRIP, 0, len(self.data))
-        
-        glDrawArrays(GL_POINTS, 0, len(self.data))
+            data2 = np.array(self.ruper.segments.keys(), dtype='uint32')
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.vbo2)
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, 8 * len(data2), data2, GL_STATIC_DRAW)
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.vbo2)
+            glDrawElements(GL_LINES, 2 * len(data), GL_UNSIGNED_INT, None)
+
+            data3 = np.array(self.ruper.triangles.keys(), dtype='uint32')
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.vbo3)
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, 12 * len(data3), data3, GL_STATIC_DRAW)
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.vbo3)
+            glDrawElements(GL_TRIANGLES, 3 * len(data3), GL_UNSIGNED_INT, None)
 
     def wheelEvent(self, event):
         self.scale *= math.exp(0.0 - float(event.angleDelta().y()) / 400.0)
@@ -148,6 +163,9 @@ void main()
 
         self.update()
 
+    def setRuper(self, ruper):
+        self.ruper = ruper
+
 class Form(QWidget):
     STATE_INIT = 0
     STATE_LOADED = 1
@@ -161,6 +179,7 @@ class Form(QWidget):
 
         self.buttonReset = QPushButton("Reset")
         self.buttonReset.clicked.connect(self.reset)
+        self.lineeditModelname = QLineEdit(self)
         self.buttonLoad = QPushButton("Load from file")
         self.buttonLoad.clicked.connect(self.load)
         self.buttonStep1 = QPushButton("Step1")
@@ -174,6 +193,8 @@ class Form(QWidget):
 
         buttonLayout = QHBoxLayout()
         buttonLayout.addWidget(self.buttonReset)
+        buttonLayout.addWidget(QLabel('Model name:'))
+        buttonLayout.addWidget(self.lineeditModelname)
         buttonLayout.addWidget(self.buttonLoad)
         buttonLayout.addWidget(self.buttonStep1)
         buttonLayout.addWidget(self.buttonStep2)
@@ -199,16 +220,60 @@ class Form(QWidget):
         self.buttonStep4.setEnabled(state == Form.STATE_STEP3_DONE)
 
     def reset(self):
+        self.ruper = None
+        self.displayWidget.setRuper(None)
+
+        self.displayWidget.update()
+
         self.setState(Form.STATE_INIT)
+
     def load(self):
+        planar = triPackage.get_data(self.lineeditModelname.text())
+        vertices = []
+        segments = []
+        segmentsMark = []
+        for vertex in planar['vertices']:
+            vertices.append((vertex[0], vertex[1]))
+        for segment in planar['segments']:
+            segments.append((segment[0], segment[1]))
+            segmentsMark.append(((segment[0], segment[1]), 1))
+        self.ruper = Ruper(vertices, segments, segmentsMark)
+        self.displayWidget.setRuper(self.ruper)
+
+        self.displayWidget.update()
+
         self.setState(Form.STATE_LOADED)
+
     def step1(self):
+        while self.ruper.stage != 1:
+            self.ruper.NextStep()
+
+        self.displayWidget.update()
+
         self.setState(Form.STATE_STEP1_DONE)
+
     def step2(self):
+        while self.ruper.stage != 2:
+            self.ruper.NextStep()
+
+        self.displayWidget.update()
+            
         self.setState(Form.STATE_STEP2_DONE)
+
     def step3(self):
+        while self.ruper.stage != 3:
+            self.ruper.NextStep()
+
+        self.displayWidget.update()
+            
         self.setState(Form.STATE_STEP3_DONE)
+
     def step4(self):
+        while self.ruper.stage != 4:
+            self.ruper.NextStep()
+
+        self.displayWidget.update()
+            
         self.setState(Form.STATE_STEP4_DONE)
 
 if __name__ == '__main__':
