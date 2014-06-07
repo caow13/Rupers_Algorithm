@@ -96,11 +96,12 @@ class Ruper:
                     break
 
 
-
-    def GetSegmentKey(self, segment):
+    @staticmethod
+    def GetSegmentKey(segment):
         return tuple(sorted((segment[0], segment[1])))
 
-    def GetTriangleKey(self, triangle):
+    @staticmethod
+    def GetTriangleKey(triangle):
         return tuple(sorted((triangle[0], triangle[1], triangle[2])))
 
     def InsertSV(self, segment, vertex):
@@ -247,6 +248,8 @@ class Ruper:
         self.AddTriangle((p, a, b))
         self.AddTriangle((p, b, c))
         self.AddTriangle((p, c, a))
+        self.os.deletedTriangle = (a, b, c)
+        self.os.addedTriangles = [(p, a, b), (p, b, c), (p, c, a)]
         self.SwapTest(p, a, b, c)
 
     def GetEncroachedS(self, triangleList):
@@ -281,6 +284,7 @@ class Ruper:
         self.DelSegment(segment)
         self.AddSegment((segment[0], count))
         self.AddSegment((segment[1], count))
+        self.os.addedSegments = [(segment[0], count), (segment[1], count)]
 
         segmentMark = self.DelSegmentMark(segment)
         self.AddSegmentMark((segment[0], count), segmentMark)
@@ -410,7 +414,7 @@ class Ruper:
                 self.stage += 1
         else:
             self.FinishGenerating()
-        self.ShowOS(self.os)
+#        self.ShowOS(self.os)
 #        self.Show()
         return self.os
 
