@@ -2,7 +2,6 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtOpenGL import *
 from OpenGL.GL import *
-from OpenGL.GL.ARB.vertex_buffer_object import *
 import numpy
 import threading
 import time
@@ -480,7 +479,7 @@ class Form(QWidget):
         self.setState(Form.STATE_INIT)
 
     def load(self):
-        planar = triPackage.get_data(self.lineeditModelname.text())
+        planar = triPackage.load('.', self.lineeditModelname.text())
         vertices = []
         segments = []
         segmentsMark = []
