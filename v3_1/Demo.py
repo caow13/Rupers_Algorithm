@@ -24,6 +24,8 @@ class DisplayWidget(QGLWidget):
     HIGHLIGHT_SEGMENT_COLOR = EDGE_COLOR
     ENCROACHED_SEGMENT_COLOR = [0.0, 1.0, 1.0, 1.0]
 
+    FILL_SCREEN_RATIO = 0.8
+
     POINT_SIZE = 10.0
     SEGMENT_LINE_WIDTH = 7.0
     EDGE_LINE_WIDTH = 1.0
@@ -409,6 +411,30 @@ void main()
 
         self.data_lock.release()
 
+    def autoWrap(self):
+        if len(self.vertices) == 0:
+            return
+
+        x_min = self.vertices[0][0]
+        x_max = self.vertices[0][0]
+        y_min = self.vertices[0][1]
+        y_max = self.vertices[0][1]
+        for vertex in self.vertices:
+            if vertex[0] < x_min:
+                x_min = vertex[0]
+            elif vertex[0] > x_max:
+                x_max = vertex[0]
+            if vertex[1] < y_min:
+                y_min = vertex[1]
+            elif vertex[1] > y_max:
+                y_max = vertex[1]
+
+        self.offset_x = 0.0 - (x_min + x_max) / 2
+        self.tmp_offset_x = 0.0
+        self.offset_y = 0.0 - (y_min + y_max) / 2
+        self.tmp_offset_y = 0.0
+        self.scale = 2.0 * DisplayWidget.FILL_SCREEN_RATIO / max(x_max - x_min, y_max - y_min)
+
 class Form(QWidget):
     STATE_INIT = 0
     STATE_LOADED = 1
@@ -491,6 +517,7 @@ class Form(QWidget):
         self.ruper = Ruper(vertices, segments, segmentsMark)
 
         self.displayWidget.setData(self.ruper.vertices, self.ruper.segments, self.ruper.triangles)
+        self.displayWidget.autoWrap()
         self.displayWidget.update()
 
         self.setState(Form.STATE_LOADED)
