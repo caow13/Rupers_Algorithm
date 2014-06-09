@@ -6,7 +6,7 @@ from OpenGL.GL import *
 MODE_LOOP = 0
 MODE_POINT = 1
 
-class DisplayWidget(QGLWidget):
+class DisplayWidget2(QGLWidget):
 	def __init__(self, parent):
 		QGLWidget.__init__(self, parent)
 		self.setMinimumSize(500, 500)
@@ -126,7 +126,7 @@ class DisplayWidget(QGLWidget):
 			msgBox.setText("Saved successfully.")
 			msgBox.exec_()
 
-class Form(QWidget):
+class Form2(QWidget):
 
 	def __init__(self, parent=None):
 		QWidget.__init__(self, parent)
@@ -155,7 +155,7 @@ class Form(QWidget):
 		buttonLayout.addWidget(self.buttonLoad)
 		buttonLayout.addWidget(groupBox)
 
-		self.displayWidget = DisplayWidget(self)
+		self.displayWidget = DisplayWidget2(self)
 		self.displayWidget.mode = MODE_LOOP
 
 		mainLayout = QVBoxLayout()
@@ -183,7 +183,7 @@ if __name__ == '__main__':
 
 	app = QApplication(sys.argv)
 
-	form = Form()
+	form = Form2()
 	form.show()
 
 	sys.exit(app.exec_())

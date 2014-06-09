@@ -9,6 +9,7 @@ import math
 import copy
 
 from Ruper import *
+from Generate import *
 
 class DisplayWidget(QGLWidget):
     ANIMATION_ROUNDS = 40
@@ -450,6 +451,8 @@ class Form(QWidget):
     def __init__(self, parent=None):
         QWidget.__init__(self, parent)
 
+        self.buttonGenerate = QPushButton("Create new model")
+        self.buttonGenerate.clicked.connect(self.generate)
         self.buttonReset = QPushButton("Reset")
         self.buttonReset.clicked.connect(self.reset)
         self.lineeditModelname = QLineEdit(self)
@@ -469,6 +472,7 @@ class Form(QWidget):
         self.buttonStep4Single.clicked.connect(self.step4Single)
 
         buttonLayout = QHBoxLayout()
+        buttonLayout.addWidget(self.buttonGenerate)
         buttonLayout.addWidget(self.buttonReset)
         buttonLayout.addWidget(QLabel('Model name:'))
         buttonLayout.addWidget(self.lineeditModelname)
@@ -500,6 +504,7 @@ class Form(QWidget):
     def setState(self, state):
         self.state = state
         if self.in_animation:
+            self.buttonGenerate.setEnabled(False)
             self.buttonReset.setEnabled(False)
             self.buttonLoad.setEnabled(False)
             self.buttonStep1.setEnabled(False)
@@ -509,6 +514,7 @@ class Form(QWidget):
             self.buttonStep4.setEnabled(False)
             self.buttonStep4Single.setEnabled(False)
         else:
+            self.buttonGenerate.setEnabled(True)
             self.buttonReset.setEnabled(True)
             self.buttonLoad.setEnabled(state == Form.STATE_INIT)
             self.buttonStep1.setEnabled(state == Form.STATE_LOADED)
@@ -517,6 +523,10 @@ class Form(QWidget):
             self.buttonStep3.setEnabled(state == Form.STATE_STEP2_DONE)
             self.buttonStep4.setEnabled(state == Form.STATE_STEP3_DONE)
             self.buttonStep4Single.setEnabled(state == Form.STATE_STEP3_DONE)
+
+    def generate(self):
+        self.form2 = Form2()
+        self.form2.show()
 
     def reset(self):
         self.ruper = None
