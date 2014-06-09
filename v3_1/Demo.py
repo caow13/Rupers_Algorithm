@@ -319,9 +319,9 @@ void main()
         self.step2AddedTriangles = step2AddedTriangles
         self.EncroachedSegments = EncroachedSegments
         self.FlipSequence = FlipSequence
-        thread = threading.Thread(target=self.updateStep2SingleThread, args=(vertices, segments, triangles))
+        thread = threading.Thread(target=self.updateStep2SingleThread, args=(vertices, segments, triangles, self.parent()))
         thread.start()
-    def updateStep2SingleThread(self, vertices, segments, triangles):
+    def updateStep2SingleThread(self, vertices, segments, triangles, widget):
         rounds = 1 + len(self.FlipSequence)
         if len(self.EncroachedSegments) > 0:
             rounds = rounds + 1
@@ -332,6 +332,8 @@ void main()
         self.setData(vertices, segments, triangles)
         self.update()
 
+        widget.animationEnd()
+
     def updateStep4Single(self, step4Vertex, step4Triangle, step4DeletedTriangle, step4AddedTriangles, EncroachedSegments, FlipSequence, vertices, segments, triangles):
         self.stepType = 4
         self.step4Vertex = step4Vertex
@@ -340,9 +342,9 @@ void main()
         self.step4AddedTriangles = step4AddedTriangles
         self.EncroachedSegments = EncroachedSegments
         self.FlipSequence = FlipSequence
-        thread = threading.Thread(target=self.updateStep4SingleThread, args=(vertices, segments, triangles))
+        thread = threading.Thread(target=self.updateStep4SingleThread, args=(vertices, segments, triangles, self.parent()))
         thread.start()
-    def updateStep4SingleThread(self, vertices, segments, triangles):
+    def updateStep4SingleThread(self, vertices, segments, triangles, widget):
         rounds = 1 + len(self.FlipSequence)
         if len(self.EncroachedSegments) > 0:
             rounds = rounds + 1
@@ -352,6 +354,8 @@ void main()
         self.round = -1
         self.setData(vertices, segments, triangles)
         self.update()
+
+        widget.animationEnd()
 
     def wheelEvent(self, event):
         self.scale *= math.exp(0.0 - float(event.angleDelta().y()) / 400.0)
@@ -485,16 +489,34 @@ class Form(QWidget):
         self.setLayout(mainLayout)
         self.setWindowTitle("Demo")
 
+        self.in_animation = False
         self.setState(Form.STATE_INIT)
 
+    def animationEnd(self):
+        self.in_animation = False
+        self.setState(self.state)
+        self.update()
+
     def setState(self, state):
-        self.buttonLoad.setEnabled(state == Form.STATE_INIT)
-        self.buttonStep1.setEnabled(state == Form.STATE_LOADED)
-        self.buttonStep2.setEnabled(state == Form.STATE_STEP1_DONE)
-        self.buttonStep2Single.setEnabled(state == Form.STATE_STEP1_DONE)
-        self.buttonStep3.setEnabled(state == Form.STATE_STEP2_DONE)
-        self.buttonStep4.setEnabled(state == Form.STATE_STEP3_DONE)
-        self.buttonStep4Single.setEnabled(state == Form.STATE_STEP3_DONE)
+        self.state = state
+        if self.in_animation:
+            self.buttonReset.setEnabled(False)
+            self.buttonLoad.setEnabled(False)
+            self.buttonStep1.setEnabled(False)
+            self.buttonStep2.setEnabled(False)
+            self.buttonStep2Single.setEnabled(False)
+            self.buttonStep3.setEnabled(False)
+            self.buttonStep4.setEnabled(False)
+            self.buttonStep4Single.setEnabled(False)
+        else:
+            self.buttonReset.setEnabled(True)
+            self.buttonLoad.setEnabled(state == Form.STATE_INIT)
+            self.buttonStep1.setEnabled(state == Form.STATE_LOADED)
+            self.buttonStep2.setEnabled(state == Form.STATE_STEP1_DONE)
+            self.buttonStep2Single.setEnabled(state == Form.STATE_STEP1_DONE)
+            self.buttonStep3.setEnabled(state == Form.STATE_STEP2_DONE)
+            self.buttonStep4.setEnabled(state == Form.STATE_STEP3_DONE)
+            self.buttonStep4Single.setEnabled(state == Form.STATE_STEP3_DONE)
 
     def reset(self):
         self.ruper = None
@@ -522,6 +544,8 @@ class Form(QWidget):
 
         self.setState(Form.STATE_LOADED)
 
+        self.update()
+
     def step1(self):
         while self.ruper.stage != 1:
             self.ruper.NextStep()
@@ -537,8 +561,11 @@ class Form(QWidget):
         if result != None:
             self.displayWidget.updateStep2Single(result.vertex, result.segment, result.addedSegments, result.deletedTriangle, result.addedTriangles, result.encroachedS, result.flipSequence, self.ruper.vertices, self.ruper.segments, self.ruper.triangles)
         
+        self.in_animation = True
         if self.ruper.stage == 2:   
             self.setState(Form.STATE_STEP2_DONE)
+        else:
+            self.setState(Form.STATE_STEP1_DONE)
 
     def step2(self):
         while self.ruper.stage != 2:
@@ -569,8 +596,11 @@ class Form(QWidget):
             else:
                 self.displayWidget.update()
 
+        self.in_animation = True
         if self.ruper.stage == 4:    
             self.setState(Form.STATE_STEP4_DONE)
+        else:
+            self.setState(Form.STATE_STEP3_DONE)
 
     def step4(self):
         while self.ruper.stage != 4:
