@@ -39,7 +39,7 @@ class DisplayWidget(QGLWidget):
 
     def __init__(self, parent):
         QGLWidget.__init__(self, parent)
-        self.setMinimumSize(300, 300)
+        self.setMinimumSize(600, 600)
 
         self.offset_x = 0.0
         self.offset_y = 0.0
@@ -495,13 +495,15 @@ class Form(QWidget):
         self.displayWidget = DisplayWidget(self)
         self.displayText = QLabel()
         f = self.displayText.font()
-        f.setPixelSize(48)
+        f.setPixelSize(30)
         self.displayText.setFont(f)
+        displayLayout = QHBoxLayout()
+        displayLayout.addWidget(self.displayWidget)
+        displayLayout.addWidget(self.displayText)
 
         mainLayout = QVBoxLayout()
         mainLayout.addLayout(buttonLayout)
-        mainLayout.addWidget(self.displayWidget)
-        mainLayout.addWidget(self.displayText)
+        mainLayout.addLayout(displayLayout)
 
         self.setLayout(mainLayout)
         self.setWindowTitle("Demo")
@@ -604,7 +606,7 @@ class Form(QWidget):
         self.displayWidget.setData(self.ruper.vertices, self.ruper.segments, self.ruper.triangles)
         self.displayWidget.update()
 
-        self.displayText.setText(u"加中点，解决过细三角形")
+        self.displayText.setText(u"加中点\n解决过细三角形")
             
         self.setState(Form.STATE_STEP2_DONE)
 
@@ -645,7 +647,7 @@ class Form(QWidget):
         self.displayWidget.setData(self.ruper.vertices, self.ruper.segments, self.ruper.triangles)
         self.displayWidget.update()
 
-        self.displayText.setText(u"加中点／加外心，解决过细三角形")
+        self.displayText.setText(u"加中点／加外心\n解决过细三角形")
             
         self.setState(Form.STATE_INIT)
 
