@@ -149,13 +149,13 @@ class DisplayWidget2(QGLWidget):
 		self.current_loop = []
 
 	def save(self, filename):
-		if len(self.current_loop > 0):
+		if len(self.current_loop) > 0:
 			msgBox = QMessageBox()
 			msgBox.setText("Please finish current loop first")
 			msgBox.exec_()
 			return
 
-		with open(filename + '.poly', 'w') as f:
+		with open(filename, 'w') as f:
 			# Number of points
 			num_points = 0
 			for loop in self.loops:
@@ -199,7 +199,6 @@ class Form2(QWidget):
 
 		self.buttonReset = QPushButton("Reset")
 		self.buttonReset.clicked.connect(self.reset)
-		self.lineeditFilename = QLineEdit(self)
 		self.buttonLoad = QPushButton("Save to file")
 		self.buttonLoad.clicked.connect(self.save)
 
@@ -216,8 +215,6 @@ class Form2(QWidget):
 
 		buttonLayout = QHBoxLayout()
 		buttonLayout.addWidget(self.buttonReset)
-		buttonLayout.addWidget(QLabel('Model name:'))
-		buttonLayout.addWidget(self.lineeditFilename)
 		buttonLayout.addWidget(self.buttonLoad)
 		buttonLayout.addWidget(groupBox)
 
@@ -241,8 +238,8 @@ class Form2(QWidget):
 		self.displayWidget.update()
 
 	def save(self):
-		if self.lineeditFilename.text() != '':
-			self.displayWidget.save(self.lineeditFilename.text())
+		file_name = QFileDialog.getSaveFileName(self, "Save Data File", "", "Polygon data files (*.poly)")[0]
+		self.displayWidget.save(file_name)
 
 if __name__ == '__main__':
 	import sys

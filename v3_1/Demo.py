@@ -9,6 +9,7 @@ import threading
 import time
 import math
 import copy
+import os
 
 from Ruper import *
 from Generate import *
@@ -471,7 +472,6 @@ class Form(QWidget):
         self.buttonGenerate.clicked.connect(self.generate)
         self.buttonReset = QPushButton("Reset")
         self.buttonReset.clicked.connect(self.reset)
-        self.lineeditModelname = QLineEdit(self)
         self.buttonLoad = QPushButton("Load from file")
         self.buttonLoad.clicked.connect(self.load)
         self.buttonStep1 = QPushButton("Step1")
@@ -490,8 +490,6 @@ class Form(QWidget):
         buttonLayout = QHBoxLayout()
         buttonLayout.addWidget(self.buttonGenerate)
         buttonLayout.addWidget(self.buttonReset)
-        buttonLayout.addWidget(QLabel('Model name:'))
-        buttonLayout.addWidget(self.lineeditModelname)
         buttonLayout.addWidget(self.buttonLoad)
         buttonLayout.addWidget(self.buttonStep1)
         buttonLayout.addWidget(self.buttonStep2Single)
@@ -560,7 +558,10 @@ class Form(QWidget):
         self.setState(Form.STATE_INIT)
 
     def load(self):
-        planar = triPackage.load('.', self.lineeditModelname.text())
+        file_name = QFileDialog.getOpenFileName(self, "Open Data File", "", "Polygon data files (*.poly)")[0]
+        tmp = os.path.basename(file_name)
+        base_name = tmp[:len(tmp) - 5]
+        planar = triPackage.load(os.path.dirname(file_name), base_name)
         vertices = []
         segments = []
         segmentsMark = []
