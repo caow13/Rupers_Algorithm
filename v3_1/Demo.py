@@ -1,3 +1,5 @@
+# -*- coding: UTF-8 -*-
+
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtOpenGL import *
@@ -17,6 +19,7 @@ class DisplayWidget(QGLWidget):
     ANIMATION_ROUNDS_QUARTER = ANIMATION_ROUNDS / 4
     ANIMATION_TIME = 0.1
     
+    BG_COLOR = [0.0, 0.0, 0.0, 1.0]
     TRIANGLE_COLOR_VALUE = 0.3
     SEGMENT_COLOR = [0.0, 0.0, 1.0, 1.0]
     EDGE_COLOR = [1.0, 1.0, 1.0, 1.0]
@@ -123,8 +126,7 @@ void main()
     def paintGL(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-        # Fill with black
-        glClearColor(0.0, 0.0, 0.0, 1.0)
+        glClearColor(DisplayWidget.BG_COLOR[0], DisplayWidget.BG_COLOR[1], DisplayWidget.BG_COLOR[2], DisplayWidget.BG_COLOR[3])
 
         if self.vertices != None:
             glUseProgram(self.program)
@@ -186,6 +188,9 @@ void main()
             if self.round != -1:
                 if self.round < DisplayWidget.ANIMATION_ROUNDS:
                     if self.stepType == 2:
+                        if self.round == 0:
+                            self.parent().displayText.setText(u"把线段中点加入点集\n")
+
                         # Highlight segment
                         lw = DisplayWidget.MAX_LINE_WIDTH / DisplayWidget.ANIMATION_ROUNDS_QUARTER * (DisplayWidget.ANIMATION_ROUNDS_QUARTER - abs(DisplayWidget.ANIMATION_ROUNDS_QUARTER - (self.round % DisplayWidget.ANIMATION_ROUNDS_HALF)))
                         if lw == 0.0:
@@ -226,6 +231,9 @@ void main()
                             del self.segments[Ruper.GetSegmentKey(self.step2Segment)]
                             del self.triangles[Ruper.GetTriangleKey(self.step2DeletedTriangle)]
                     else:
+                        if self.round == 0:
+                            self.parent().displayText.setText(u"把三角形外心加入点集\n")
+
                         # Highlight triangle
                         gray = DisplayWidget.TRIANGLE_COLOR_VALUE + (1.0 - DisplayWidget.TRIANGLE_COLOR_VALUE) / DisplayWidget.ANIMATION_ROUNDS_QUARTER * (DisplayWidget.ANIMATION_ROUNDS_QUARTER - abs(DisplayWidget.ANIMATION_ROUNDS_QUARTER - (self.round % DisplayWidget.ANIMATION_ROUNDS_HALF)))
                         glUniform4f(self.uniform_color, gray, gray, gray, 1.0)
@@ -258,20 +266,11 @@ void main()
                             self.triangles[Ruper.GetTriangleKey(self.step4AddedTriangles[2])] = True
                             del self.triangles[Ruper.GetTriangleKey(self.step4DeletedTriangle)]
                 elif self.round < DisplayWidget.ANIMATION_ROUNDS * (1 + len(self.FlipSequence)):
+                    if self.round == 40:
+                        self.parent().displayText.setText(self.parent().displayText.text() + u"调整三角化所用边\n")
+
                     # Highlight flip sequence
                     flip_seq_id = self.round / DisplayWidget.ANIMATION_ROUNDS - 1
-
-                    # 4 points
-                    ps = DisplayWidget.MAX_POINT_SIZE / DisplayWidget.ANIMATION_ROUNDS_QUARTER * (DisplayWidget.ANIMATION_ROUNDS_QUARTER - abs(DisplayWidget.ANIMATION_ROUNDS_QUARTER - (self.round % DisplayWidget.ANIMATION_ROUNDS_HALF)))
-                    if ps == 0.0:
-                        ps = 1.0
-                    glPointSize(ps)
-                    glUniform4fv(self.uniform_color, 1, DisplayWidget.HIGHLIGHT_POINT_COLOR)
-                    data6 = np.array(self.FlipSequence[flip_seq_id][0], dtype='uint32')
-                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.vbo3)
-                    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 8 * len(data6), data6, GL_STATIC_DRAW)
-                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.vbo3)
-                    glDrawElements(GL_POINTS, len(data6), GL_UNSIGNED_INT, None)
 
                     # Edge flipped?
                     lw = DisplayWidget.MAX_LINE_WIDTH / DisplayWidget.ANIMATION_ROUNDS_QUARTER * (DisplayWidget.ANIMATION_ROUNDS_QUARTER - abs(DisplayWidget.ANIMATION_ROUNDS_QUARTER - (self.round % DisplayWidget.ANIMATION_ROUNDS_HALF)))
@@ -291,6 +290,18 @@ void main()
                     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.vbo3)
                     glDrawElements(GL_LINES, 2 * len(data5), GL_UNSIGNED_INT, None)
 
+                    # 4 points
+                    ps = DisplayWidget.MAX_POINT_SIZE / DisplayWidget.ANIMATION_ROUNDS_QUARTER * (DisplayWidget.ANIMATION_ROUNDS_QUARTER - abs(DisplayWidget.ANIMATION_ROUNDS_QUARTER - (self.round % DisplayWidget.ANIMATION_ROUNDS_HALF)))
+                    if ps == 0.0:
+                        ps = 1.0
+                    glPointSize(ps)
+                    glUniform4fv(self.uniform_color, 1, DisplayWidget.HIGHLIGHT_POINT_COLOR)
+                    data6 = np.array(self.FlipSequence[flip_seq_id][0], dtype='uint32')
+                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.vbo3)
+                    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 8 * len(data6), data6, GL_STATIC_DRAW)
+                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.vbo3)
+                    glDrawElements(GL_POINTS, len(data6), GL_UNSIGNED_INT, None)
+
                     if self.round % DisplayWidget.ANIMATION_ROUNDS == DisplayWidget.ANIMATION_ROUNDS_HALF:
                         if self.FlipSequence[flip_seq_id][1] != 0:
                             points = self.FlipSequence[flip_seq_id][0]
@@ -299,6 +310,11 @@ void main()
                             self.triangles[Ruper.GetTriangleKey((points[0], points[1], points[3]))] = True
                             self.triangles[Ruper.GetTriangleKey((points[0], points[2], points[3]))] = True
                 else:
+                    if self.round % DisplayWidget.ANIMATION_ROUNDS == 0:
+                        self.parent().displayText.setText(self.parent().displayText.text() + u"造成非法边\n")
+                        if self.stepType == 4:
+                            self.parent().displayText.setText(self.parent().displayText.text() + u"回滚该步所有操作\n")
+
                     # Highlight encroached segments
                     lw = DisplayWidget.MAX_LINE_WIDTH / DisplayWidget.ANIMATION_ROUNDS_QUARTER * (DisplayWidget.ANIMATION_ROUNDS_QUARTER - abs(DisplayWidget.ANIMATION_ROUNDS_QUARTER - (self.round % DisplayWidget.ANIMATION_ROUNDS_HALF)))
                     if lw == 0.0:
@@ -485,10 +501,17 @@ class Form(QWidget):
         buttonLayout.addWidget(self.buttonStep4)
 
         self.displayWidget = DisplayWidget(self)
+        self.displayText = QLabel()
+        f = self.displayText.font()
+        f.setPixelSize(48)
+        self.displayText.setFont(f)
+        self.displayLayout = QHBoxLayout()
+        self.displayLayout.addWidget(self.displayWidget)
+        self.displayLayout.addWidget(self.displayText)
 
         mainLayout = QVBoxLayout()
         mainLayout.addLayout(buttonLayout)
-        mainLayout.addWidget(self.displayWidget)
+        mainLayout.addLayout(self.displayLayout)
 
         self.setLayout(mainLayout)
         self.setWindowTitle("Demo")
@@ -563,6 +586,8 @@ class Form(QWidget):
         self.displayWidget.setData(self.ruper.vertices, self.ruper.segments, self.ruper.triangles)
         self.displayWidget.update()
 
+        self.displayText.setText(u"Delauney三角化")
+
         self.setState(Form.STATE_STEP1_DONE)
 
     def step2Single(self):
@@ -583,6 +608,8 @@ class Form(QWidget):
 
         self.displayWidget.setData(self.ruper.vertices, self.ruper.segments, self.ruper.triangles)
         self.displayWidget.update()
+
+        self.displayText.setText(u"加中点，解决过细三角形")
             
         self.setState(Form.STATE_STEP2_DONE)
 
@@ -592,6 +619,8 @@ class Form(QWidget):
 
         self.displayWidget.setData(self.ruper.vertices, self.ruper.segments, self.ruper.triangles)
         self.displayWidget.update()
+
+        self.displayText.setText(u"删除多余边")
             
         self.setState(Form.STATE_STEP3_DONE)
 
@@ -618,6 +647,8 @@ class Form(QWidget):
 
         self.displayWidget.setData(self.ruper.vertices, self.ruper.segments, self.ruper.triangles)
         self.displayWidget.update()
+
+        self.displayText.setText(u"加中点／加外心，解决过细三角形")
             
         self.setState(Form.STATE_STEP4_DONE)
 
