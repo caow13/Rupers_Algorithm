@@ -149,6 +149,12 @@ class DisplayWidget2(QGLWidget):
 		self.current_loop = []
 
 	def save(self, filename):
+		if len(self.current_loop > 0):
+			msgBox = QMessageBox()
+			msgBox.setText("Please finish current loop first")
+			msgBox.exec_()
+			return
+
 		with open(filename + '.poly', 'w') as f:
 			# Number of points
 			num_points = 0
