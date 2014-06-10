@@ -6,6 +6,41 @@ from OpenGL.GL import *
 MODE_LOOP = 0
 MODE_POINT = 1
 
+def determinant(v1, v2, v3, v4):
+	return v1*v3-v2*v4
+
+def intersection(p1, p2, p3, p4):
+    # Store the values for fast access and easy
+    # equations-to-code conversion
+    x1 = p1[0]
+    x2 = p2[0]
+    x3 = p3[0]
+    x4 = p4[0]
+    y1 = p1[1]
+    y2 = p2[1]
+    y3 = p3[1]
+    y4 = p4[1]
+ 
+    d = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
+    # If d is zero, there is no intersection
+    if d == 0:
+     	return None
+ 
+    # Get the x and y
+    pre = x1*y2 - y1*x2
+    post = x3*y4 - y3*x4
+    x = ( pre * (x3 - x4) - (x1 - x2) * post ) / d
+    y = ( pre * (y3 - y4) - (y1 - y2) * post ) / d
+ 
+    # Check if the x and y coordinates are within both lines
+    if x < min(x1, x2) or x > max(x1, x2) or x < min(x3, x4) or x > max(x3, x4):
+     	return None
+    if y < min(y1, y2) or y > max(y1, y2) or y < min(y3, y4) or y > max(y3, y4):
+     	return None
+ 
+    # Return the point of intersection
+    return [x, y]
+
 class DisplayWidget2(QGLWidget):
 	def __init__(self, parent):
 		QGLWidget.__init__(self, parent)
@@ -73,11 +108,36 @@ class DisplayWidget2(QGLWidget):
 			# Finished ?
 			if len(self.current_loop) >= 3:
 				start_point = self.current_loop[0]
-				if (x - start_point[0]) * (x - start_point[0]) + (y - start_point[1]) * (y - start_point[1]) < 0.001:
+				if (x - start_point[0]) * (x - start_point[0]) + (y - start_point[1]) * (y - start_point[1]) < 1e-3:
 					self.loops.append(self.current_loop)
 					self.current_loop = []
 					self.update()
 					return
+
+			# Now we did not end current_loop, so intersection with any other segment is illegal.
+			if len(self.current_loop) > 0:
+				p0 = self.current_loop[len(self.current_loop) - 1]
+				p1 = [x, y]
+				for loop in self.loops:
+					for i in xrange(len(loop)):
+						p2 = loop[i]
+						p3 = loop[(i + 1) % len(loop)]
+						ii = intersection(p0, p1, p2, p3)
+						if ii != None and (p0[0] - ii[0]) * (p0[0] - ii[0]) + (p0[1] - ii[1]) * (p0[1] - ii[1]) > 1e-3:
+							msgBox = QMessageBox()
+							msgBox.setText("Segments should not intersect")
+							msgBox.exec_()
+							return
+				if len(self.current_loop) > 1:
+					for i in xrange(len(self.current_loop) - 1):
+						p2 = self.current_loop[i]
+						p3 = self.current_loop[(i + 1) % len(self.current_loop)]
+						ii = intersection(p0, p1, p2, p3)
+						if ii != None and (p0[0] - ii[0]) * (p0[0] - ii[0]) + (p0[1] - ii[1]) * (p0[1] - ii[1]) > 1e-3:
+							msgBox = QMessageBox()
+							msgBox.setText("Segments should not intersect")
+							msgBox.exec_()
+							return
 
 			self.current_loop.append([x, y])
 			self.update()
