@@ -333,12 +333,15 @@ void main()
         thread = threading.Thread(target=self.updateStep2SingleThread, args=(vertices, segments, triangles, self.parent()))
         thread.start()
     def updateStep2SingleThread(self, vertices, segments, triangles, widget):
+        self.stop_animation = False
         rounds = 1 + len(self.FlipSequence)
         if len(self.EncroachedSegments) > 0:
             rounds = rounds + 1
         for self.round in range(0, DisplayWidget.ANIMATION_ROUNDS * rounds):
             self.update()
             time.sleep(DisplayWidget.ANIMATION_TIME)
+            if self.stop_animation:
+                break
         self.round = -1
         self.setData(vertices, segments, triangles)
         self.update()
@@ -356,12 +359,15 @@ void main()
         thread = threading.Thread(target=self.updateStep4SingleThread, args=(vertices, segments, triangles, self.parent()))
         thread.start()
     def updateStep4SingleThread(self, vertices, segments, triangles, widget):
+        self.stop_animation = False
         rounds = 1 + len(self.FlipSequence)
         if len(self.EncroachedSegments) > 0:
             rounds = rounds + 1
         for self.round in range(0, DisplayWidget.ANIMATION_ROUNDS * rounds):
             self.update()
             time.sleep(DisplayWidget.ANIMATION_TIME)
+            if self.stop_animation:
+                break
         self.round = -1
         self.setData(vertices, segments, triangles)
         self.update()
@@ -450,6 +456,9 @@ void main()
         self.tmp_offset_y = 0.0
         self.scale = 2.0 * DisplayWidget.FILL_SCREEN_RATIO / max(x_max - x_min, y_max - y_min)
 
+    def skipAnimation(self):
+        self.stop_animation = True
+
 class Form(QWidget):
     STATE_INIT = 0
     STATE_LOADED = 1
@@ -467,6 +476,8 @@ class Form(QWidget):
         self.buttonReset.clicked.connect(self.reset)
         self.buttonLoad = QPushButton("Load from file")
         self.buttonLoad.clicked.connect(self.load)
+        self.buttonStopAnimation = QPushButton("Stop Animation")
+        self.buttonStopAnimation.clicked.connect(self.skipAnimation)
         self.buttonStep1 = QPushButton("Step1")
         self.buttonStep1.clicked.connect(self.step1)
         self.buttonStep2Single = QPushButton("Step2 Single")
@@ -484,6 +495,7 @@ class Form(QWidget):
         buttonLayout.addWidget(self.buttonReset)
         buttonLayout.addWidget(self.buttonGenerate)
         buttonLayout.addWidget(self.buttonLoad)
+        buttonLayout.addWidget(self.buttonStopAnimation)
         buttonLayout.addWidget(self.buttonStep1)
         buttonLayout.addWidget(self.buttonStep2Single)
         buttonLayout.addWidget(self.buttonStep2)
@@ -512,6 +524,9 @@ class Form(QWidget):
 
         self.in_animation = False
         self.setState(Form.STATE_INIT)
+
+    def skipAnimation(self):
+        self.displayWidget.skipAnimation()
 
     def animationEnd(self):
         self.in_animation = False
