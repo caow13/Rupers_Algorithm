@@ -39,7 +39,6 @@ class DisplayWidget(QGLWidget):
 
     def __init__(self, parent):
         QGLWidget.__init__(self, parent)
-        self.setMinimumSize(600, 600)
 
         self.offset_x = 0.0
         self.offset_y = 0.0
@@ -493,10 +492,13 @@ class Form(QWidget):
         buttonLayout.addWidget(self.buttonStep4)
 
         self.displayWidget = DisplayWidget(self)
+        self.displayWidget.setMinimumSize(600, 600)
+        self.displayWidget.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
         self.displayText = QLabel()
         f = self.displayText.font()
         f.setPixelSize(30)
         self.displayText.setFont(f)
+        self.displayText.setFixedWidth(400)
         displayLayout = QHBoxLayout()
         displayLayout.addWidget(self.displayWidget)
         displayLayout.addWidget(self.displayText)
