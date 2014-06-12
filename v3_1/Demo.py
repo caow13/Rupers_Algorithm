@@ -262,12 +262,27 @@ void main()
                             self.triangles[Ruper.GetTriangleKey(self.step4AddedTriangles[1])] = True
                             self.triangles[Ruper.GetTriangleKey(self.step4AddedTriangles[2])] = True
                             del self.triangles[Ruper.GetTriangleKey(self.step4DeletedTriangle)]
-                elif self.round < DisplayWidget.ANIMATION_ROUNDS * (1 + len(self.FlipSequence)):
-                    if self.round == 40:
+                elif self.round < DisplayWidget.ANIMATION_ROUNDS * (1 + len(self.LocationSequence)):
+                    if self.round == DisplayWidget.ANIMATION_ROUNDS:
+                        self.parent().displayText.setText(self.parent().displayText.text() + u"三角形外心点定位\n")
+
+                    # Highlight triangle path
+                    triangle_id = self.round / DisplayWidget.ANIMATION_ROUNDS - 1
+                    triangle = self.LocationSequence[triangle_id]
+                    
+                    gray = DisplayWidget.TRIANGLE_COLOR_VALUE + (1.0 - DisplayWidget.TRIANGLE_COLOR_VALUE) / DisplayWidget.ANIMATION_ROUNDS_QUARTER * (DisplayWidget.ANIMATION_ROUNDS_QUARTER - abs(DisplayWidget.ANIMATION_ROUNDS_QUARTER - (self.round % DisplayWidget.ANIMATION_ROUNDS_HALF)))
+                    glUniform4f(self.uniform_color, gray, gray, gray, 1.0)
+                    data5 = np.array(triangle, dtype='uint32')
+                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.vbo3)
+                    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 4 * len(data5), data5, GL_STATIC_DRAW)
+                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.vbo3)
+                    glDrawElements(GL_TRIANGLES, len(data5), GL_UNSIGNED_INT, None)
+                elif self.round < DisplayWidget.ANIMATION_ROUNDS * (1 + len(self.LocationSequence) + len(self.FlipSequence)):
+                    if self.round == DisplayWidget.ANIMATION_ROUNDS * (1 + len(self.LocationSequence)):
                         self.parent().displayText.setText(self.parent().displayText.text() + u"调整三角化所用边\n")
 
                     # Highlight flip sequence
-                    flip_seq_id = self.round / DisplayWidget.ANIMATION_ROUNDS - 1
+                    flip_seq_id = self.round / DisplayWidget.ANIMATION_ROUNDS - len(self.LocationSequence) - 1
 
                     # Edge flipped?
                     lw = DisplayWidget.MAX_LINE_WIDTH / DisplayWidget.ANIMATION_ROUNDS_QUARTER * (DisplayWidget.ANIMATION_ROUNDS_QUARTER - abs(DisplayWidget.ANIMATION_ROUNDS_QUARTER - (self.round % DisplayWidget.ANIMATION_ROUNDS_HALF)))
@@ -330,6 +345,7 @@ void main()
         self.step2AddedTriangles = step2AddedTriangles
         self.EncroachedSegments = EncroachedSegments
         self.FlipSequence = FlipSequence
+        self.LocationSequence = []
         thread = threading.Thread(target=self.updateStep2SingleThread, args=(vertices, segments, triangles, self.parent()))
         thread.start()
     def updateStep2SingleThread(self, vertices, segments, triangles, widget):
@@ -348,7 +364,7 @@ void main()
 
         widget.animationEnd()
 
-    def updateStep4Single(self, step4Vertex, step4Triangle, step4DeletedTriangle, step4AddedTriangles, EncroachedSegments, FlipSequence, vertices, segments, triangles):
+    def updateStep4Single(self, step4Vertex, step4Triangle, step4DeletedTriangle, step4AddedTriangles, EncroachedSegments, FlipSequence, LocationSequence, vertices, segments, triangles):
         self.stepType = 4
         self.step4Vertex = step4Vertex
         self.step4Triangle = step4Triangle
@@ -356,6 +372,7 @@ void main()
         self.step4AddedTriangles = step4AddedTriangles
         self.EncroachedSegments = EncroachedSegments
         self.FlipSequence = FlipSequence
+        self.LocationSequence = LocationSequence
         thread = threading.Thread(target=self.updateStep4SingleThread, args=(vertices, segments, triangles, self.parent()))
         thread.start()
     def updateStep4SingleThread(self, vertices, segments, triangles, widget):
@@ -645,7 +662,7 @@ class Form(QWidget):
             if result.operation == 'split':
                 self.displayWidget.updateStep2Single(result.vertex, result.segment, result.addedSegments, result.deletedTriangle, result.addedTriangles, result.encroachedS, result.flipSequence, self.ruper.vertices, self.ruper.segments, self.ruper.triangles)
             elif result.operation == 'insert':
-                self.displayWidget.updateStep4Single(result.vertex, result.triangle, result.deletedTriangle, result.addedTriangles, result.encroachedS, result.flipSequence, self.ruper.vertices, self.ruper.segments, self.ruper.triangles)
+                self.displayWidget.updateStep4Single(result.vertex, result.triangle, result.deletedTriangle, result.addedTriangles, result.encroachedS, result.flipSequence, result.locationSequence, self.ruper.vertices, self.ruper.segments, self.ruper.triangles)
             else:
                 self.displayWidget.update()
 
