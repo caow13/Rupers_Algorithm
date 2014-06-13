@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<!-- saved from url=(0084)file:///C:/Users/CaoWei/Desktop/page/Ruppert%E7%AE%97%E6%B3%95%E6%BC%94%E7%A4%BA.htm -->
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+<meta name="keywords" content="Ruppert算法演示">   
+<meta name="description" content="Ruppert算法演示">   
+<title>Ruppert算法演示</title>
+
+<link rel="stylesheet" href="http://www.ifreethinking.com/static/style.css">
+
+<!--[if IE]><link rel="shortcut icon" href="/favicon/favicon.ico" /><![endif]-->
+
+
+
+
+
+
+
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="msapplication-TileImage" content="/favicon/birdie-152-188961.png">
+
+<link rel="author" href="https://plus.google.com/107416471764838863583">
+<script type="text/javascript" async="" src="file:///C:/Users/CaoWei/Desktop/page/Ruppert%E7%AE%97%E6%B3%95%E6%BC%94%E7%A4%BA_files/embed.js" charset="UTF-8"></script><link type="text/css" rel="stylesheet" href="./Ruppert算法演示_files/embed.default.css"><style type="text/css">#ds-thread .ds-powered-by{display:none!important;}
+
+#ds-thread #ds-reset .ds-comment-footer .ds-post-repost{display:none!important;}
+
+#ds-thread .ds-login-buttons{display:none!important;}
+
+.ds-sync{display:none !important;}
+/*隐藏评论框底部分享*/
+#ds-thread #ds-reset .ds-toolbar {display:none!important;}
+
+#ds-wrapper .ds-dialog-footer{display:none!important;}
+
+#ds-thread #ds-reset .ds-order-hot  {display:none!important;}
+
+#ds-thread #ds-reset #ds-bubble {display:none!important;}
+
+
+#ds-thread #ds-reset .ds-comment-body p a {
+-webkit-transition: all 0.2s ease;
+-moz-transition: all 0.2s ease;
+-o-transition: all 0.2s ease;
+transition: all 0.2s ease;
+color: #CD5C5C;
+border-bottom: 1px solid #ECECEC;
+}
+
+#ds-thread #ds-reset .ds-comment-body p a:hover {
+color: #e60900 !important;
+border-bottom: 1px solid #e60900;
+}
+
+
+#ds-thread #ds-reset .ds-time {
+margin-right:15px !important;
+}
+
+#ds-thread #ds-reset .ds-comment-actions a .ds-icon {
+margin-right:2px !important;
+}
+
+#ds-thread #ds-reset li.ds-tab a {
+cursor:default !important;
+}
+
+#ds-wrapper #ds-reset .ds-icons-32 {
+margin-bottom:30px !important;
+}
+
+
+#ds-thread #ds-reset {
+    margin-top: 30px !important;
+    color: #6F6F6F !important;
+    font-size: 1.1em !important;
+}
+
+#ds-reset .ds-avatar {
+    border-radius: 50%;
+}
+
+#ds-reset .ds-avatar img{
+    width:54px;height:54px; /*设置图像的长和宽*/
+    border-radius: 50%;/*设置图像圆角效果,在这里我直接设置了超过width/2的像素，即为圆形了*/
+    -webkit-border-radius: 27px;/*圆角效果：兼容webkit浏览器*/
+    -moz-border-radius:27px;
+    box-shadow: inset 0 -1px 0 #3333sf;/*设置图像阴影效果*/
+    -webkit-box-shadow: inset 0 -1px 0 #3333sf;
+    -webkit-transition: 0.4s;   
+    -webkit-transition: -webkit-transform 0.4s ease-out;
+    transition: transform 0.4s ease-out;/*变化时间设置为0.4秒(变化动作即为下面的图像旋转360读）*/
+    -moz-transition: -moz-transform 0.4s ease-out;
+}
+ 
+#ds-reset .ds-avatar img:hover{/*设置鼠标悬浮在头像时的CSS样式*/
+    box-shadow: 0 0 10px #fff; rgba(255,255,255,.6), inset 0 0 20px rgba(255,255,255,1);
+    -webkit-box-shadow: 0 0 10px #fff; rgba(255,255,255,.6), inset 0 0 20px rgba(255,255,255,1);
+    transform: rotateZ(360deg);/*图像旋转360度*/
+    -webkit-transform: rotateZ(360deg);
+    -moz-transform: rotateZ(360deg);
+   }
+
+
+#ds-thread #ds-reset .ds-border-highlight {
+    border-bottom: 0 !important;
+}
+
+#ds-thread #ds-reset .ds-comment-body {
+padding-left: 70px;
+}
+
+#ds-thread #ds-reset ul.ds-children .ds-comment-body {
+padding-left: 48px;
+}
+
+#ds-thread #ds-reset .ds-post-self {
+padding-left: 15px !important;
+}
+
+
+#ds-thread #ds-reset .ds-post-self:hover {
+background-color: #F2E6E6;
+-webkit-transition-delay: initial;
+-webkit-transition-duration: 0.4s;
+-webkit-transition-property: all;
+-webkit-transition-timing-function: initial;
+}
+
+</style><script type="text/javascript" async="" src="file:///C:/Users/CaoWei/Desktop/page/iFreeThinking%20-%20%E9%BB%84%E7%BB%B4%E7%84%B6%E7%9A%84%E5%8D%9A%E5%AE%A2_files/embed(1).js" charset="UTF-8"></script><link type="text/css" rel="stylesheet" href="file:///C:/Users/CaoWei/Desktop/page/iFreeThinking%20-%20%E9%BB%84%E7%BB%B4%E7%84%B6%E7%9A%84%E5%8D%9A%E5%AE%A2_files/embed.default(1).css"><style type="text/css">#ds-thread .ds-powered-by{display:none!important;}
+
+#ds-thread #ds-reset .ds-comment-footer .ds-post-repost{display:none!important;}
+
+#ds-thread .ds-login-buttons{display:none!important;}
+
+.ds-sync{display:none !important;}
+/*隐藏评论框底部分享*/
+#ds-thread #ds-reset .ds-toolbar {display:none!important;}
+
+#ds-wrapper .ds-dialog-footer{display:none!important;}
+
+#ds-thread #ds-reset .ds-order-hot  {display:none!important;}
+
+#ds-thread #ds-reset #ds-bubble {display:none!important;}
+
+
+#ds-thread #ds-reset .ds-comment-body p a {
+-webkit-transition: all 0.2s ease;
+-moz-transition: all 0.2s ease;
+-o-transition: all 0.2s ease;
+transition: all 0.2s ease;
+color: #CD5C5C;
+border-bottom: 1px solid #ECECEC;
+}
+
+#ds-thread #ds-reset .ds-comment-body p a:hover {
+color: #e60900 !important;
+border-bottom: 1px solid #e60900;
+}
+
+
+#ds-thread #ds-reset .ds-time {
+margin-right:15px !important;
+}
+
+#ds-thread #ds-reset .ds-comment-actions a .ds-icon {
+margin-right:2px !important;
+}
+
+#ds-thread #ds-reset li.ds-tab a {
+cursor:default !important;
+}
+
+#ds-wrapper #ds-reset .ds-icons-32 {
+margin-bottom:30px !important;
+}
+
+
+#ds-thread #ds-reset {
+    margin-top: 30px !important;
+    color: #6F6F6F !important;
+    font-size: 1.1em !important;
+}
+
+#ds-reset .ds-avatar {
+    border-radius: 50%;
+}
+
+#ds-reset .ds-avatar img{
+    width:54px;height:54px; /*设置图像的长和宽*/
+    border-radius: 50%;/*设置图像圆角效果,在这里我直接设置了超过width/2的像素，即为圆形了*/
+    -webkit-border-radius: 27px;/*圆角效果：兼容webkit浏览器*/
+    -moz-border-radius:27px;
+    box-shadow: inset 0 -1px 0 #3333sf;/*设置图像阴影效果*/
+    -webkit-box-shadow: inset 0 -1px 0 #3333sf;
+    -webkit-transition: 0.4s;   
+    -webkit-transition: -webkit-transform 0.4s ease-out;
+    transition: transform 0.4s ease-out;/*变化时间设置为0.4秒(变化动作即为下面的图像旋转360读）*/
+    -moz-transition: -moz-transform 0.4s ease-out;
+}
+ 
+#ds-reset .ds-avatar img:hover{/*设置鼠标悬浮在头像时的CSS样式*/
+    box-shadow: 0 0 10px #fff; rgba(255,255,255,.6), inset 0 0 20px rgba(255,255,255,1);
+    -webkit-box-shadow: 0 0 10px #fff; rgba(255,255,255,.6), inset 0 0 20px rgba(255,255,255,1);
+    transform: rotateZ(360deg);/*图像旋转360度*/
+    -webkit-transform: rotateZ(360deg);
+    -moz-transform: rotateZ(360deg);
+   }
+
+
+#ds-thread #ds-reset .ds-border-highlight {
+    border-bottom: 0 !important;
+}
+
+#ds-thread #ds-reset .ds-comment-body {
+padding-left: 70px;
+}
+
+#ds-thread #ds-reset ul.ds-children .ds-comment-body {
+padding-left: 48px;
+}
+
+#ds-thread #ds-reset .ds-post-self {
+padding-left: 15px !important;
+}
+
+
+#ds-thread #ds-reset .ds-post-self:hover {
+background-color: #F2E6E6;
+-webkit-transition-delay: initial;
+-webkit-transition-duration: 0.4s;
+-webkit-transition-property: all;
+-webkit-transition-timing-function: initial;
+}
+
+</style><script type="text/javascript" async="" src="file:///C:/Users/CaoWei/Desktop/page/Ruppert%E7%AE%97%E6%B3%95%E6%BC%94%E7%A4%BA_files/embed(2).js" charset="UTF-8"></script><link type="text/css" rel="stylesheet" href="./Ruppert算法演示_files/embed.default(2).css"><style type="text/css">#ds-thread .ds-powered-by{display:none!important;}
+
+#ds-thread #ds-reset .ds-comment-footer .ds-post-repost{display:none!important;}
+
+#ds-thread .ds-login-buttons{display:none!important;}
+
+.ds-sync{display:none !important;}
+/*隐藏评论框底部分享*/
+#ds-thread #ds-reset .ds-toolbar {display:none!important;}
+
+#ds-wrapper .ds-dialog-footer{display:none!important;}
+
+#ds-thread #ds-reset .ds-order-hot  {display:none!important;}
+
+#ds-thread #ds-reset #ds-bubble {display:none!important;}
+
+
+#ds-thread #ds-reset .ds-comment-body p a {
+-webkit-transition: all 0.2s ease;
+-moz-transition: all 0.2s ease;
+-o-transition: all 0.2s ease;
+transition: all 0.2s ease;
+color: #CD5C5C;
+border-bottom: 1px solid #ECECEC;
+}
+
+#ds-thread #ds-reset .ds-comment-body p a:hover {
+color: #e60900 !important;
+border-bottom: 1px solid #e60900;
+}
+
+
+#ds-thread #ds-reset .ds-time {
+margin-right:15px !important;
+}
+
+#ds-thread #ds-reset .ds-comment-actions a .ds-icon {
+margin-right:2px !important;
+}
+
+#ds-thread #ds-reset li.ds-tab a {
+cursor:default !important;
+}
+
+#ds-wrapper #ds-reset .ds-icons-32 {
+margin-bottom:30px !important;
+}
+
+
+#ds-thread #ds-reset {
+    margin-top: 30px !important;
+    color: #6F6F6F !important;
+    font-size: 1.1em !important;
+}
+
+#ds-reset .ds-avatar {
+    border-radius: 50%;
+}
+
+#ds-reset .ds-avatar img{
+    width:54px;height:54px; /*设置图像的长和宽*/
+    border-radius: 50%;/*设置图像圆角效果,在这里我直接设置了超过width/2的像素，即为圆形了*/
+    -webkit-border-radius: 27px;/*圆角效果：兼容webkit浏览器*/
+    -moz-border-radius:27px;
+    box-shadow: inset 0 -1px 0 #3333sf;/*设置图像阴影效果*/
+    -webkit-box-shadow: inset 0 -1px 0 #3333sf;
+    -webkit-transition: 0.4s;   
+    -webkit-transition: -webkit-transform 0.4s ease-out;
+    transition: transform 0.4s ease-out;/*变化时间设置为0.4秒(变化动作即为下面的图像旋转360读）*/
+    -moz-transition: -moz-transform 0.4s ease-out;
+}
+ 
+#ds-reset .ds-avatar img:hover{/*设置鼠标悬浮在头像时的CSS样式*/
+    box-shadow: 0 0 10px #fff; rgba(255,255,255,.6), inset 0 0 20px rgba(255,255,255,1);
+    -webkit-box-shadow: 0 0 10px #fff; rgba(255,255,255,.6), inset 0 0 20px rgba(255,255,255,1);
+    transform: rotateZ(360deg);/*图像旋转360度*/
+    -webkit-transform: rotateZ(360deg);
+    -moz-transform: rotateZ(360deg);
+   }
+
+
+#ds-thread #ds-reset .ds-border-highlight {
+    border-bottom: 0 !important;
+}
+
+#ds-thread #ds-reset .ds-comment-body {
+padding-left: 70px;
+}
+
+#ds-thread #ds-reset ul.ds-children .ds-comment-body {
+padding-left: 48px;
+}
+
+#ds-thread #ds-reset .ds-post-self {
+padding-left: 15px !important;
+}
+
+
+#ds-thread #ds-reset .ds-post-self:hover {
+background-color: #F2E6E6;
+-webkit-transition-delay: initial;
+-webkit-transition-duration: 0.4s;
+-webkit-transition-property: all;
+-webkit-transition-timing-function: initial;
+}
+
+</style><script type="text/javascript" async="" src="file:///C:/Users/CaoWei/Desktop/page/Ruppert%E7%AE%97%E6%B3%95%E6%BC%94%E7%A4%BA_files/embed(3).js" charset="UTF-8"></script><link type="text/css" rel="stylesheet" href="./Ruppert算法演示_files/embed.default(3).css"><style type="text/css">#ds-thread .ds-powered-by{display:none!important;}
+
+#ds-thread #ds-reset .ds-comment-footer .ds-post-repost{display:none!important;}
+
+#ds-thread .ds-login-buttons{display:none!important;}
+
+.ds-sync{display:none !important;}
+/*隐藏评论框底部分享*/
+#ds-thread #ds-reset .ds-toolbar {display:none!important;}
+
+#ds-wrapper .ds-dialog-footer{display:none!important;}
+
+#ds-thread #ds-reset .ds-order-hot  {display:none!important;}
+
+#ds-thread #ds-reset #ds-bubble {display:none!important;}
+
+
+#ds-thread #ds-reset .ds-comment-body p a {
+-webkit-transition: all 0.2s ease;
+-moz-transition: all 0.2s ease;
+-o-transition: all 0.2s ease;
+transition: all 0.2s ease;
+color: #CD5C5C;
+border-bottom: 1px solid #ECECEC;
+}
+
+#ds-thread #ds-reset .ds-comment-body p a:hover {
+color: #e60900 !important;
+border-bottom: 1px solid #e60900;
+}
+
+
+#ds-thread #ds-reset .ds-time {
+margin-right:15px !important;
+}
+
+#ds-thread #ds-reset .ds-comment-actions a .ds-icon {
+margin-right:2px !important;
+}
+
+#ds-thread #ds-reset li.ds-tab a {
+cursor:default !important;
+}
+
+#ds-wrapper #ds-reset .ds-icons-32 {
+margin-bottom:30px !important;
+}
+
+
+#ds-thread #ds-reset {
+    margin-top: 30px !important;
+    color: #6F6F6F !important;
+    font-size: 1.1em !important;
+}
+
+#ds-reset .ds-avatar {
+    border-radius: 50%;
+}
+
+#ds-reset .ds-avatar img{
+    width:54px;height:54px; /*设置图像的长和宽*/
+    border-radius: 50%;/*设置图像圆角效果,在这里我直接设置了超过width/2的像素，即为圆形了*/
+    -webkit-border-radius: 27px;/*圆角效果：兼容webkit浏览器*/
+    -moz-border-radius:27px;
+    box-shadow: inset 0 -1px 0 #3333sf;/*设置图像阴影效果*/
+    -webkit-box-shadow: inset 0 -1px 0 #3333sf;
+    -webkit-transition: 0.4s;   
+    -webkit-transition: -webkit-transform 0.4s ease-out;
+    transition: transform 0.4s ease-out;/*变化时间设置为0.4秒(变化动作即为下面的图像旋转360读）*/
+    -moz-transition: -moz-transform 0.4s ease-out;
+}
+ 
+#ds-reset .ds-avatar img:hover{/*设置鼠标悬浮在头像时的CSS样式*/
+    box-shadow: 0 0 10px #fff; rgba(255,255,255,.6), inset 0 0 20px rgba(255,255,255,1);
+    -webkit-box-shadow: 0 0 10px #fff; rgba(255,255,255,.6), inset 0 0 20px rgba(255,255,255,1);
+    transform: rotateZ(360deg);/*图像旋转360度*/
+    -webkit-transform: rotateZ(360deg);
+    -moz-transform: rotateZ(360deg);
+   }
+
+
+#ds-thread #ds-reset .ds-border-highlight {
+    border-bottom: 0 !important;
+}
+
+#ds-thread #ds-reset .ds-comment-body {
+padding-left: 70px;
+}
+
+#ds-thread #ds-reset ul.ds-children .ds-comment-body {
+padding-left: 48px;
+}
+
+#ds-thread #ds-reset .ds-post-self {
+padding-left: 15px !important;
+}
+
+
+#ds-thread #ds-reset .ds-post-self:hover {
+background-color: #F2E6E6;
+-webkit-transition-delay: initial;
+-webkit-transition-duration: 0.4s;
+-webkit-transition-property: all;
+-webkit-transition-timing-function: initial;
+}
+
+</style><script type="text/javascript" async="" src="./Ruppert算法演示_files/embed(4).js" charset="UTF-8"></script><link type="text/css" rel="stylesheet" href="./Ruppert算法演示_files/embed.default(4).css"><style type="text/css">#ds-thread .ds-powered-by{display:none!important;}
+
+#ds-thread #ds-reset .ds-comment-footer .ds-post-repost{display:none!important;}
+
+#ds-thread .ds-login-buttons{display:none!important;}
+
+.ds-sync{display:none !important;}
+/*隐藏评论框底部分享*/
+#ds-thread #ds-reset .ds-toolbar {display:none!important;}
+
+#ds-wrapper .ds-dialog-footer{display:none!important;}
+
+#ds-thread #ds-reset .ds-order-hot  {display:none!important;}
+
+#ds-thread #ds-reset #ds-bubble {display:none!important;}
+
+
+#ds-thread #ds-reset .ds-comment-body p a {
+-webkit-transition: all 0.2s ease;
+-moz-transition: all 0.2s ease;
+-o-transition: all 0.2s ease;
+transition: all 0.2s ease;
+color: #CD5C5C;
+border-bottom: 1px solid #ECECEC;
+}
+
+#ds-thread #ds-reset .ds-comment-body p a:hover {
+color: #e60900 !important;
+border-bottom: 1px solid #e60900;
+}
+
+
+#ds-thread #ds-reset .ds-time {
+margin-right:15px !important;
+}
+
+#ds-thread #ds-reset .ds-comment-actions a .ds-icon {
+margin-right:2px !important;
+}
+
+#ds-thread #ds-reset li.ds-tab a {
+cursor:default !important;
+}
+
+#ds-wrapper #ds-reset .ds-icons-32 {
+margin-bottom:30px !important;
+}
+
+
+#ds-thread #ds-reset {
+    margin-top: 30px !important;
+    color: #6F6F6F !important;
+    font-size: 1.1em !important;
+}
+
+#ds-reset .ds-avatar {
+    border-radius: 50%;
+}
+
+#ds-reset .ds-avatar img{
+    width:54px;height:54px; /*设置图像的长和宽*/
+    border-radius: 50%;/*设置图像圆角效果,在这里我直接设置了超过width/2的像素，即为圆形了*/
+    -webkit-border-radius: 27px;/*圆角效果：兼容webkit浏览器*/
+    -moz-border-radius:27px;
+    box-shadow: inset 0 -1px 0 #3333sf;/*设置图像阴影效果*/
+    -webkit-box-shadow: inset 0 -1px 0 #3333sf;
+    -webkit-transition: 0.4s;   
+    -webkit-transition: -webkit-transform 0.4s ease-out;
+    transition: transform 0.4s ease-out;/*变化时间设置为0.4秒(变化动作即为下面的图像旋转360读）*/
+    -moz-transition: -moz-transform 0.4s ease-out;
+}
+ 
+#ds-reset .ds-avatar img:hover{/*设置鼠标悬浮在头像时的CSS样式*/
+    box-shadow: 0 0 10px #fff; rgba(255,255,255,.6), inset 0 0 20px rgba(255,255,255,1);
+    -webkit-box-shadow: 0 0 10px #fff; rgba(255,255,255,.6), inset 0 0 20px rgba(255,255,255,1);
+    transform: rotateZ(360deg);/*图像旋转360度*/
+    -webkit-transform: rotateZ(360deg);
+    -moz-transform: rotateZ(360deg);
+   }
+
+
+#ds-thread #ds-reset .ds-border-highlight {
+    border-bottom: 0 !important;
+}
+
+#ds-thread #ds-reset .ds-comment-body {
+padding-left: 70px;
+}
+
+#ds-thread #ds-reset ul.ds-children .ds-comment-body {
+padding-left: 48px;
+}
+
+#ds-thread #ds-reset .ds-post-self {
+padding-left: 15px !important;
+}
+
+
+#ds-thread #ds-reset .ds-post-self:hover {
+background-color: #F2E6E6;
+-webkit-transition-delay: initial;
+-webkit-transition-duration: 0.4s;
+-webkit-transition-property: all;
+-webkit-transition-timing-function: initial;
+}
+
+</style><script type="text/javascript" async="" src="./Ruppert算法演示_files/embed(5).js" charset="UTF-8"></script><link type="text/css" rel="stylesheet" href="./Ruppert算法演示_files/embed.default(5).css"><style type="text/css">#ds-thread .ds-powered-by{display:none!important;}
+
+#ds-thread #ds-reset .ds-comment-footer .ds-post-repost{display:none!important;}
+
+#ds-thread .ds-login-buttons{display:none!important;}
+
+.ds-sync{display:none !important;}
+/*隐藏评论框底部分享*/
+#ds-thread #ds-reset .ds-toolbar {display:none!important;}
+
+#ds-wrapper .ds-dialog-footer{display:none!important;}
+
+#ds-thread #ds-reset .ds-order-hot  {display:none!important;}
+
+#ds-thread #ds-reset #ds-bubble {display:none!important;}
+
+
+#ds-thread #ds-reset .ds-comment-body p a {
+-webkit-transition: all 0.2s ease;
+-moz-transition: all 0.2s ease;
+-o-transition: all 0.2s ease;
+transition: all 0.2s ease;
+color: #CD5C5C;
+border-bottom: 1px solid #ECECEC;
+}
+
+#ds-thread #ds-reset .ds-comment-body p a:hover {
+color: #e60900 !important;
+border-bottom: 1px solid #e60900;
+}
+
+
+#ds-thread #ds-reset .ds-time {
+margin-right:15px !important;
+}
+
+#ds-thread #ds-reset .ds-comment-actions a .ds-icon {
+margin-right:2px !important;
+}
+
+#ds-thread #ds-reset li.ds-tab a {
+cursor:default !important;
+}
+
+#ds-wrapper #ds-reset .ds-icons-32 {
+margin-bottom:30px !important;
+}
+
+
+#ds-thread #ds-reset {
+    margin-top: 30px !important;
+    color: #6F6F6F !important;
+    font-size: 1.1em !important;
+}
+
+#ds-reset .ds-avatar {
+    border-radius: 50%;
+}
+
+#ds-reset .ds-avatar img{
+    width:54px;height:54px; /*设置图像的长和宽*/
+    border-radius: 50%;/*设置图像圆角效果,在这里我直接设置了超过width/2的像素，即为圆形了*/
+    -webkit-border-radius: 27px;/*圆角效果：兼容webkit浏览器*/
+    -moz-border-radius:27px;
+    box-shadow: inset 0 -1px 0 #3333sf;/*设置图像阴影效果*/
+    -webkit-box-shadow: inset 0 -1px 0 #3333sf;
+    -webkit-transition: 0.4s;   
+    -webkit-transition: -webkit-transform 0.4s ease-out;
+    transition: transform 0.4s ease-out;/*变化时间设置为0.4秒(变化动作即为下面的图像旋转360读）*/
+    -moz-transition: -moz-transform 0.4s ease-out;
+}
+ 
+#ds-reset .ds-avatar img:hover{/*设置鼠标悬浮在头像时的CSS样式*/
+    box-shadow: 0 0 10px #fff; rgba(255,255,255,.6), inset 0 0 20px rgba(255,255,255,1);
+    -webkit-box-shadow: 0 0 10px #fff; rgba(255,255,255,.6), inset 0 0 20px rgba(255,255,255,1);
+    transform: rotateZ(360deg);/*图像旋转360度*/
+    -webkit-transform: rotateZ(360deg);
+    -moz-transform: rotateZ(360deg);
+   }
+
+
+#ds-thread #ds-reset .ds-border-highlight {
+    border-bottom: 0 !important;
+}
+
+#ds-thread #ds-reset .ds-comment-body {
+padding-left: 70px;
+}
+
+#ds-thread #ds-reset ul.ds-children .ds-comment-body {
+padding-left: 48px;
+}
+
+#ds-thread #ds-reset .ds-post-self {
+padding-left: 15px !important;
+}
+
+
+#ds-thread #ds-reset .ds-post-self:hover {
+background-color: #F2E6E6;
+-webkit-transition-delay: initial;
+-webkit-transition-duration: 0.4s;
+-webkit-transition-property: all;
+-webkit-transition-timing-function: initial;
+}
+
+</style></head>
+
+<body>
+<div id="header">
+    <h1><a href="http://caow13.github.io/Rupers_Algorithm/">Ruppert Algorithm</a></h1>
+    <h4>Ruppert算法演示程序</h4>
+</div>
+
+<div itemscope="" itemtype="http://schema.org/Blog" id="main">
+  
+    <div itemprop="blogPosts" itemscope="" itemtype="http://schema.org/BlogPosting" class="article">
+        <div itemprop="name headline" class="ptitle"><a href="http://caow13.github.io/Rupers_Algorithm/">演示程序说明</a></div>
+        <div itemprop="description" class="pmain"><p>本Project为Ruppert初始算法的演示程序，程序中提供了几个具有代表性的poly文件，并且支持用户自定义输入平面图，但由于初始算法限制，输入平面图需满足所有角度大于等于60度。</p>
+<blockquote>
+
+<p>程序通过Python2.7编写，需要PyOpenGL以及PyQT5的支持，对于PyQT5不直接支持Python2.7的问题，可以通过本地重新编译PyQT5解决。源代码可以在<a href="https://github.com/caow13/Rupers_Algorithm/blob/master/Ruppert_Python.rar?raw=true">这里</a>下载</p><p>如果没有相应环境，<a href="https://github.com/caow13/Rupers_Algorithm/blob/master/Ruppert_EXE.rar?raw=true">这里</a>提供了打包好的exe文件，其中主程序为Demo.exe, 数据文件在Data文件夹中。对于没有安装Visual Studio2012的同学请先安装我们压缩包中提供的vcredist_x86.exe文件。另外如果运行机器为集成显卡可能会造成线段不平滑等问题。</p><p>程序分为Stage1(初始化Delaunay三角剖分), Stage2(解决Encroach边), Stage3(删除多余边)，以及Stage4(解决Skinny三角形)四个阶段，对于2,4两个阶段点击相应的Step Single可以观察到对应的动画演示效果。在演示中点击Stop Animation可快速结束单步演示</p>
+</blockquote>
+
+</div>
+        
+        
+    </div>
+  
+    
+  
+    
+  
+    
+  
+    
+</div>
+<div id="footer">
+	
+    <div>@计算几何大作业小组 沈彤 金毅飞 曹玮</div>
+    
+</div>
+<script src="file:///C:/Users/CaoWei/Desktop/page/Ruppert%E7%AE%97%E6%B3%95%E6%BC%94%E7%A4%BA_files/jquery-1.8.0.js"></script>
+
+<!-- 返回顶部 Begin -->
+
+<script>
+$(function(){
+  // 给 window 对象绑定 scroll 事件
+  $(window).bind("scroll", function(){
+      // 获取网页文档对象滚动条的垂直偏移
+      var scrollTopNum = $(document).scrollTop(),
+          // 获取浏览器当前窗口的高度
+          winHeight = $(window).height(),
+          returnTop = $("div.returnTop");
+
+      // 滚动条的垂直偏移大于 0 时显示，反之隐藏
+      (scrollTopNum > 50) ? returnTop.fadeIn("fast") : returnTop.fadeOut("fast");
+
+      // 给 IE6 定位
+      if (!-[1,]&&!window.XMLHttpRequest) {
+          returnTop.css("top", scrollTopNum + winHeight - 200);
+      }
+  });
+  // 点击按钮后，滚动条的垂直方向的值逐渐变为0，也就是滑动向上的效果
+  $("span.gotoTop").click(function() {
+      $("html, body").animate({ scrollTop: 0 }, 200);
+  });
+});
+</script>
+<!-- 返回顶部 End -->
+
+<!-- baidu tongji BEGIN -->
+<script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F5e11c37f439bb8206a66b0d547768ae2' type='text/javascript'%3E%3C/script%3E"));
+</script><script src="./Ruppert算法演示_files/h.js" type="text/javascript"></script><script src="./Ruppert算法演示_files/h(1).js" type="text/javascript"></script><script src="./Ruppert算法演示_files/h(1).js" type="text/javascript"></script><script src="./Ruppert算法演示_files/h(2).js" type="text/javascript"></script><script src="./Ruppert算法演示_files/h(3).js" type="text/javascript"></script><script src="file:///C:/Users/CaoWei/Desktop/page/iFreeThinking%20-%20%E9%BB%84%E7%BB%B4%E7%84%B6%E7%9A%84%E5%8D%9A%E5%AE%A2_files/h(1).js" type="text/javascript"></script>
+<!-- baidu tongji END -->
+<!-- 多说js加载开始，一个页面只需要加载一次 -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"wrhuang"};
+(function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = 'http://static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!-- 多说js加载结束，一个页面只需要加载一次 -->
+
+
+</body></html>
