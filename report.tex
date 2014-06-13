@@ -1,0 +1,436 @@
+\documentclass[letterpaper,12pt]{article} 
+\usepackage{geometry} 
+\usepackage{float}
+%\geometry{verbose,letterpaper,tmargin=2cm,bmargin=2cm,lmargin=2cm,rmargin=2cm} 
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage[utf8]{inputenc} 
+\usepackage{graphicx} 
+\usepackage{subfigure}
+\usepackage{CJKutf8} 
+\usepackage{amsfonts,amssymb} 
+\usepackage{amsmath} 
+\usepackage{amsthm}
+\usepackage[T1]{fontenc} 
+\usepackage[utf8]{inputenc} 
+\usepackage{lmodern} 
+\usepackage{tikz}
+\usepackage{setspace}
+
+% math theorem 
+\newtheorem{fact}{Fact} 
+\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}[lemma]{Theorem} 
+\newtheorem{definition}[lemma]{Definition}
+\newtheorem{assumption}[lemma]{Assumption} 
+\newtheorem{corollary}[lemma]{Corollary}
+\newtheorem{proposition}[lemma]{Proposition} 
+\newtheorem{exercise}[lemma]{Exercise}
+\newtheorem{claim}[lemma]{Claim} 
+\newtheorem{remark}[lemma]{Remark} 
+\newtheorem{prob}{Problem}
+\newtheorem{conjecture}{Conjecture}
+
+% computer science 
+% \usepackage[linesnumbered,boxed,ruled,vlined,longend]{algorithm2e}
+\usepackage[linesnumbered,boxed,ruled,longend]{algorithm2e} % cite and link 
+\usepackage{cite}
+\usepackage{url} 
+\usepackage[final]{hyperref} % adds hyper links inside the generated pdf file
+
+\hypersetup{ colorlinks=true, % false: boxed links; true: colored links linkcolor=blue, % color of internal links 
+citecolor=blue,  % color of links to bibliography filecolor=magenta, % color of filelinks 
+urlcolor=blue }
+
+
+
+
+
+\title{Ruppert's Delaunay Refinement Algorithm} \author{Tong, Shen. \footnote{Email:
+385989829@qq.com} Wei, Cao.\footnote{Email: fatboy\_cw@163.com } Yifei, Jin \footnote{Email:
+bluewould@yeah.net} }
+
+\begin{document}
+\maketitle
+
+\begin{abstract} Delaunay triangulation maximizes the smallest angle among all possible
+triangulations of a given input and hence is a powerful discretization tool. However, Delaunay
+triangulation can have arbitrarily small angles depending on the input configuration. Thus, Delaunay
+refinement algorithms which iteratively insert additional points were developed to remedy the
+problem.
+
+  Delaunay refinement method is arguably the most popular due to its theoretical guarantee and
+performance in practice. The first step of a Delaunay refinement algorithm is the construction of a
+constrained or conforming Delaunay triangulation of the input domain. This initial Delaunay
+triangulation is likely to have bad elements. Delaunay refinement algorithm then iteratively adds
+new points to the domain to improve the quality of the mesh and to ensure that the mesh conforms to
+the boundary of the input domain. The points inserted by the Delaunay refinement are \emph{Steiner
+points}. A sequential Delaunay refinement algorithm typically adds one new vertex at each
+iteration. Each new vertex is chosen from a set of candidates -- the circumcenters of bad triangles
+and the mid-points of input segments. Chew \cite{Chew} showed that Delaunay refinement can be used
+to produce quality-guaranteed in two dimensions. Ruppert extended the technique for computing not
+only quality-guaranteed but also size-optimal triangulations.
+
+  In our experiment report, we implement the Ruppert algorithm. And give a friendly interactive
+application.
+
+\end{abstract}
+
+\section{Algorithm}
+\label{sec:01}
+
+\subsection{Background}
+\label{sec:01:01} In two dimensions, the input domain $\Omega$ is usually represented as
+\emph{planar straight line graph} (PSLG) -- proper planar drawing in which each edge is mapped to a
+straight line segment between its two endpoint \cite{Ruppert}. The segments express the boundaries
+of $\Omega$ and the endpoints are the vertices of $\Omega$.
+
+\begin{definition}[diametral circle] 
+
+The diametral circle of a segment is the circle whose diameter
+is the segment. Equivalently, the diametral circle of a segment is also the smallest circle that
+encloses the segment.
+
+\end{definition}
+
+\begin{definition}[encroach] 
+
+A segment is said to be encroached if a vertex lies strictly inside its
+diametral circle, or if the segment does not appear as an edge of the triangulation.
+
+\end{definition}
+
+\begin{definition}[Constrained Delaunay triangulation]
+
+ constrained Delaunay triangulation is a
+generalization of the Delaunay triangulation that forces certain required segments into the
+triangulation. \footnote{Note: Because a Delaunay triangulation is almost always unique, often a
+constrained Delaunay triangulation contains edges that do not satisfy the Delaunay condition. Thus a
+constrained Delaunay triangulation often is not a Delaunay triangulation itself.}
+
+\end{definition}
+
+\begin{definition}[Radius-edge Ratio]
+
+ Radius-edge ration of a triangle is the ratio of its
+circumradius to the length of its shortest side.
+\end{definition}
+
+\begin{definition}{skinny triangle} 
+
+Skinny trinangle, alternately named bad triangle, is a triangle
+whose radius-edge ratio is larger than a specified constant $\beta$.\footnote{in this experiment
+report, we define $\beta=\sqrt{2}$}
+\end{definition}
+
+
+Note, in the refinement triangulation, we demand all triangles' angle larger than some constant
+$\alpha$. It is easy to prove, in two dimensions, an upper bound $\beta$ on the radius-edge ration
+implies a lower bound $\alpha = \arcsin(1/2\beta)$ on the smallest angle and vice versa.
+
+\subsection{Ruppert's Algorithm}
+\label{sec:01:02}
+
+The pseudocode Ruppert's algorithm is listed in \ref{algo:01}. As an example , the figure
+\ref{fig:01} give a explanation.
+
+The algorithm input an PSLG graph. At first step, we do a Delaunay triangulation of the input
+vertices. But there are some segments of subsegments are not strongly Delaunay, just like the figure
+\ref{fig:subfig:c}, which means these segments do not satisfies \emph{empty circle
+property}\footnote{Two sites $p_i$ and $p_j$ are connected by an edge in the Delaunay triangulation,
+if and only if there is an empty circle passing through $p_i$ and $p_j$ .}. And some vertices lie
+strictly inside a diametral circle of some segments, just like figure \ref{fig:subfig:d}. In order
+to include the segments, second step, we add its mid-points. Because there are some segment locates
+outside the interval region, at third step, we just delete them.  Then at fourth step, we process
+the skinny triangle just like the figure \ref{fig:subfig:e}. we add the circumcenter.  If the
+circumcenter is not cause any encroach, we accept it and re-triangulate the graph. If not we delete
+it and add the encroach segment. \footnote{Here note that: the circumcenter is deleted, in fact the
+segment is just encroach a virtual point. The reason is guarantee the following circumcenter locate
+in the internal region which we prove later}.  Through iterations, we could get final refinement
+Delaunay triangulation.
+
+
+
+\begin{figure}[!htb] \centering
+
+  \subfigure[A sample input PSLG]{
+    \label{fig:subfig:a}
+    \includegraphics[width=0.25\textwidth]{fig01.png}} \subfigure[Delaunay triangulation of the
+input vertices, note that some input segment are missing]{
+    \label{fig:subfig:b}
+    \includegraphics[width=0.25\textwidth]{fig02.png}} \subfigure[Vertex insertion restores the
+missing segment]{
+    \label{fig:subfig:c}
+    \includegraphics[width=0.25\textwidth]{fig03.png}}
+
+
+  \subfigure[Encroached subsegment is split]{
+    \label{fig:subfig:d}
+    \includegraphics[width=0.25\textwidth]{fig04.png}} \subfigure[Delete the outer segments]{
+    \label{fig:subfig:e}
+    \includegraphics[width=0.25\textwidth]{fig05.png}} \subfigure[Shinny triangle's circumcenter is
+inserted]{
+    \label{fig:subfig:f}
+    \includegraphics[width=0.25\textwidth]{fig06.png}}
+
+  \subfigure[This circumcenter encroaches upon a segment, and is rejected]{
+    \label{fig:subfig:g}
+    \includegraphics[width=0.25\textwidth]{fig07.png}} \subfigure[Although the circumcenter was
+rejected, the segment it encroached upon is still marked for bisection]{
+    \label{fig:subfig:h}
+    \includegraphics[width=0.25\textwidth]{fig08.png}} \subfigure[Final mesh]{
+    \label{fig:subfig:j}
+    \includegraphics[width=0.25\textwidth]{fig09.png}}
+
+  \caption{The flow of Ruppert's Algorithm}
+  \label{fig:01}
+\end{figure}
+
+\begin{algorithm}[!]
+\caption{Ruppert's refinement triangulation algorithm}
+\label{algo:01} \SetKwFunction{DelaunayTriangulation}{DelaunayTriangulation}
+\SetKwFunction{AddMidOfEncroach}{AddMidOfEncroach}
+\SetKwFunction{DelExternalSegment}{DelExternalSegment} \SetKwInOut{Input}{input}
+\SetKwInOut{Output}{output} \Input {points, segment, threshold.}  \Output{refinement triangulation
+algorithm.}
+
+  $T$: = \DelaunayTriangulation(points) \; $Q$: = the set of encroached segments and skinny
+triangles \; $T, Q$: = \AddMidOfEncroach(T,Q) \; $T$: = \DelExternalSegment(T) \;
+
+  \While{$Q$ is not empty:}{
+
+    \eIf{$Q$ contains a segment s:} {insert the midpoint of s into $T$ \;} ( $Q$ contains poor
+quality triangle $t$:) { \eIf{the circumcenter of $t$ encroaches a segments $s$: } {add $s$ to $Q$
+\;} {insert the circumcenter of $t$ into $T$ \;} } update $Q$ \; } return $T$ \;
+  
+
+\end{algorithm}
+
+\subsection{Algorithm Analysis}
+\label{sec:01:03} 
+
+\subsubsection{Circumcenter lies in boundaries}
+\label{sec:01:03:01} 
+
+The algorithm is not difficult, but their some question remained to answer. First
+is whether $v$ always locate in boundaries or not. If not, the algorithm won't
+convergence. Fortunately, we can prove all circumcenter of triangles lies in boundaries.
+
+\begin{theorem} 
+Let $T$ be a segment-bounded Delaunay triangulation (hence, any edge of $T$ that
+belongs to only one triangle is a subsegment). Suppose that $T $ has no encroached subsegments. Let
+$v$ be the circumcenter of some triangle $t$ of $T$. Then $v$ lies in $T$.\cite{Richard}
+\end{theorem}
+
+\begin{proof}
+
+ Suppose for the sake of contradiction that $v$ lies outside $T$. Let $c$ be the
+centroid of $t$.  $c$ clearly lies inside $T$. Because the triangulation is segment-bounded, the
+line segment $cv$ must cross some subsegment $s$, as Figure \ref{fig:thm1} illustrates. Because $cv$
+is entirely contained in the interior of the circumcircle of $t$, the circumcircle must contain a
+portion of $s$ ; but the Delaunay property requires that the circumcircle be empty, so the
+circumcircle cannot contain the endpoints of $s$. Say that a point is inside $s$ if it is on the
+same side of $s$ as $c$, and outside $s$ if it is on the same side of $s$ as $v$ . Because the
+center $v$ of the circumcircle of $t$ is outsides, the portion of the circumcircle that lies
+strictly insides (the bold arc in the illustration) is entirely enclosed by the diametral circle of
+$s$. The vertices of $t$ lie upont’s circumcircle and are (not strictly) insides. Up to two of the
+vertices oftmay be the endpoints of $s$, but at least one vertex oftmust lie strictly inside the
+diametral circle of $s$. But $T$ has no encroached subsegments by assumption; the result follows by
+contradiction.
+\end{proof}
+
+\begin{figure}[!htb] \centering
+  \includegraphics[width=0.6\textwidth]{figa.png}
+  \caption{: If
+ the circumcenter v of a triangle t lies outside the triangulation, then some
+subsegment s is encroached.}
+  \label{fig:thm1}
+\end{figure}
+
+\subsubsection{Convergence}
+\label{sec:01:03:02}
+
+The claim that Ruppert's algorithm produces nicely graded meshes is based on the fact that the
+spacing of vertices at any loxation in the mesh is within a constant factor of the sparsest possible
+spacing. To formalize the idea of "sparsest possible spacing'', Ruppert introduces  a function
+called the \emph{local feature size} 
+
+\begin{definition}[local feature size]
+  
+  local feature size of each point $x \in \mathcal{R}^2 $ , denoted by $lfs_{\Omega}(x)$, is the
+  radius of the smallest disk centered at $x$ that touch two different features which is the
+  vertices and boundary segments of $\Omega$.
+\end{definition}
+ Figure \ref{fig:b} illustrates the notion by giving  examples of such disks for a variety of points. 
+
+\begin{figure}[!htb]
+  \centering
+  \includegraphics[width=0.8\textwidth]{figb.png}
+  \caption{the radius of each disk illustrated is the local feature size of the point at its center}
+  \label{fig:b}
+\end{figure}
+
+It is not difficult to prove the lemma below:
+\begin{theorem}
+  For any PSLG X, and any two points $u$ and $v$ in the plane, 
+  \begin{equation*}
+    lfs(v) \leq lfs(u) +|uv|
+  \end{equation*}
+\end{theorem}
+\begin{proof}
+  Since $lfs(u)$ represent a disk centered at $u$ and intersects two non-incident features of
+  $X$. So the disk whose center is at $v$ and radius is $lsf(u) + |uv|$ also intersect at least two
+  features since it contains disk $lfs(u)$. Hence $    lfs(v) \leq lfs(u) +|uv|$. 
+\end{proof}
+
+Ruppert prove that  radius-edge ratio larger than $\sqrt{2}$ and any two incident segments in the
+input PSLG are separated by an angle of $60^{\circ}$ or greater, that the algorithm produces meshes
+that are nicely graded and size-optimal. 
+
+\begin{theorem}
+\label{thm terminate}
+  Let $lfs_{\min}$ be the shortest distance between two non-incident entities (vertices or segments)
+  of the input PSLG
+
+  suppose that any two incident segments are separated by an angle of at least $60^{\circ}$, and a
+  triangle is considered to be skinny if its circumradius -to-shortest  edge ratio is larger than
+  $B$, where $B \geq \sqrt{2}$ Ruppert's algorithm will terminate, with no triangulation edge
+  shorter than $lfs_{min}$, where $lfs_{min}$ is the $\min_{u} {lfs(u)}$, where $u$ is chosen from
+  among the input vertex. 
+\end{theorem}
+The proof of the theorem is not difficult but tedious.  You can refer reference
+\cite{Richard}. Since no edge shorter than $lfs_{min}$, and the region is limited. Therefore the
+algorithm must terminate. 
+
+\subsubsection{Size-Optimality}
+\label{sec:01:03:03}
+Theorem \ref{thm terminate} guarantees that no edge of the final mesh is smaller than $lfs_{\min}$,
+but it is not satisfying spatially graded mesh. 
+
+What following is a proof that each edge of the output mesh has length proportional to the local
+feature sizes of its endpoints. 
+
+Here omit the proof detail, just give the result.
+
+\begin{theorem} 
+  For any vertex $v$ of the output mesh, the distance to its nearest neighbor $w$ is at least
+  $\frac{lfs(v)}{D_s+1}$, where $D_s$ is a constant larger than 1. 
+\end{theorem}
+
+\subsection{Implement trick}
+\label{sec:01:04}
+The algorithm has several implement trick, we list some important below:
+\begin{itemize}
+\item At first we count the encroach segment. The segment is not strongly Delaunay , i.e. the
+  segment is not used by Delaunay triangulation. There must be a vertex on or inside its diametral  
+  circle. This observation is important because it unifies the theoretical treatment of missing
+  subsegments and encroached subsegments that are not missing.
+
+\item A subsegment may be tested for encroachment by inspecting only those vertices that appear
+  directly opposite the subsegment in a triangle. Consider Figure \ref{fig:c}. Both of the vertices
+  (v and w ) opposite the segment $s$ lie outside the diametral circle of $s$. Because the mesh is
+  constrained Delaunay, each triangle's circumcircle is empty (on its side of $s$), and therefore
+  the diametral circle of s is empty. 
+  
+  The Delaunay refinement process may cause other subsegments to become encroached. According to the
+  observation above, we don not check all segment each time but just test each of the edges that
+  appear opposite the vertex in some triangle is enough. 
+
+\item Each time we insert a new circumcenter, we need know the point locate in which triangle. So we
+  need a point a location algorithm to remain the information. But in this algorithm, we already
+  know the Delaunay triangulation, so there exist a simple point location algorithm. Just long the
+  segment between circumcenter and orthocenter. Search all the triangle along the segment, we could
+  find the circumcenter location. 
+
+
+  \begin{figure}[!htb]
+    \centering
+    \includegraphics[width= 0.9\textwidth]{figc.png}
+    \caption{if the apices(here, v and w) of the triangles that contain a subsegment $s$ are outside the diametral circle of $s$, then no vertex lies in the diametral circle of $s$, because the triangles are Delaunay}
+    \label{fig:c}
+  \end{figure}
+
+\end{itemize}
+
+
+
+\section{Code Structure}
+\label{sec:02}
+
+The code of the this project is written by \emph{Python 2.7} based on \emph{PyOpenGL} and
+\emph{PyQt5}. Only the initial delaunay triangulation is implemented with package \emph{triangle}
+provided y CMU. The code structure of main algorithm part is associated in following way:
+
+\begin{itemize}
+\item cgalgo.py 
+\begin{itemize}
+\item Sgn(x):Check the sign of a float number, the eps is setted by $1e12$.
+\item TurnLeft(v):return the $90$ degree left turn vector of input vector. 
+\item Cross(a,b, c):return the multiplication cross of vector $\vec{ba}$ and $\vec{ca}$.  
+\item GetDistance(u,v):return the Euclidean distance of point $u$ and $v$.  
+\item GetIntersection(lu, lv):return the intersection of line $lu$ and $lv$.  
+\item GetBisector(u, v):return bisector of line $uv$
+\item GetCircleCenter(a, b, c):return circumcenter of triangle $abc$.  
+\item GetSegIntersection(a, b, c, d):return the intersection of segment $ab$ and $cd$ 
+\item InTriangle(p, a, b, c):check whether point $p$ is inside of triangle $abc$.  
+\item InCircle(p, a, b, x):checht whether the point $x$ is inside of circumcircle of triangle $pab$.
+\end{itemize}
+\item Ruper.py 
+\begin{itemize}
+\item InitializeDelaunay: return the initial delaunay triangulation implemented
+with third part package \emph{triangle}.  
+\item TrianglePointLocation: find the circumcenter of a skinny triangle by flipping triangle
+sequentially.  
+\item IsEncroached:check whether a segment is a encroached segment.  
+\item IsSkinny:check whether a triangle is a skinny triangle.
+\item UpdateDelaunay: Do swap test and maintain some necessary information when the
+triangulation changed.  
+\item RecoverTriangles: recover the triangulation if a circumcenter is
+failed to insert into triangulation.  
+\item SplitSegment:split a segment by inserting a midpoint of corresponding segment.  
+\item InsertCircleCenter:insert a circumcenter of a skinny triangle.  
+\item EliminateSegment:Main loop of segments processing.  
+\item EliminateAngle:Main loop of triangles processing.  
+\item RemoveOutSide:Remove the triangles outside the planar graph.
+\end{itemize}
+
+\end{itemize}
+\section{Software instruction}
+\label{sec:03}
+This part you can see our homepage \url{http://caow13.github.io/Rupers_Algorithm/}. 
+
+\section{Experiment}
+\label{sec:04}
+We list some comparison about origin Delaunay triangulation and Ruppert's refinement algorithm. 
+
+% todo 
+
+
+\section{Conclusion and Future work}
+\label{sec:05}
+The Ruppert's algorithm is an fundamental work about refinement Delaunay triangulation. But the
+algorithm time complexity is difficult to analysis. We already know there are some algorithm can
+achieve $O(m+n\log(n))$ where $m$ is the extra points we add. The further work you can see reference
+\cite{Optimal} 
+
+
+% bibliography
+\begin{thebibliography}{99}
+
+\bibitem {Optimal} Har-Peled, Sariel, and Alper \"{U}ng\"{o}r. "A time-optimal Delaunay refinement
+algorithm in two dimensions."  Proceedings of the twenty-first annual symposium on Computational
+geometry. ACM, 2005.
+
+\bibitem {Chew} L.P.Chew. Constrained Delaunay triangular meshes. Technical Report TR-89-983,
+Dept. Comput. Sci. Cornell Univ., Ithaca, NY, Apr. 1898
+
+\bibitem{Ruppert} J. Ruppert/ A new and simple algorithm for quality 2-dimensional mesh
+generation. In \emph{Proc. 4th ACM-SIAM Sympos. Discrete Algorithm, pages 83-92, 1993}
+
+\bibitem{Richard} Lecture Notes on Delaunay Mesh Generation, Jonathan Richard Shewchuk, September
+20, 1999
+
+
+\end{thebibliography}
+
+\end{document}
