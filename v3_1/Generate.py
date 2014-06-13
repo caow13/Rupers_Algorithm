@@ -54,8 +54,8 @@ class DisplayWidget2(QGLWidget):
 		glClearColor(0.0, 0.0, 0.0, 1.0)
 		glClearDepth(1.0)
 
-        glEnable(GL_POINT_SMOOTH)
-        glEnable(GL_LINE_SMOOTH)
+#        glEnable(GL_POINT_SMOOTH)
+#        glEnable(GL_LINE_SMOOTH)
 
 	def paintGL(self):
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
