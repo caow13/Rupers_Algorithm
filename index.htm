@@ -17,6 +17,10 @@
 .content_container {
   margin-bottom: 70px;
 }
+.div_youku {
+  width: 600px;
+  height: 450px;
+}
 </style>
 </head>
 <body>
@@ -49,6 +53,36 @@ Delauney三角化实现了质量很高的点集三角化。
 <div class="content_container">
 <h3>视频展示</h3>
 <hr>
+<h4>程序基本流程：</h4>
+<ul>
+  <li>点击“Load from file”按钮，选择一个poly文件</li>
+  <li>点击“Step1”按钮，进行初始Delauney三角化</li>
+  <li>点击“Step2”按钮，通过加入线段中点，消除一些过细的三角形。可以点击“Step2 Single”按钮观看单步动画</li>
+  <li>点击“Step3”按钮，去除多余三角形</li>
+  <li>点击“Step4”按钮，通过加入三角形外心或线段中点，消除一些过细的三角形。可以点击“Step4 Single”按钮观看单步动画</li>
+  <li>算法结束</li>
+</ul>
+<div id="player1" class="div_youku"></div>
+<h4>自定义模型：</h4>
+<ul>
+  <li>点击“Create new model”按钮</li>
+  <li>绘制一系列点，组成模型的外边界</li>
+  <li>绘制一系列点，组成模型内部的孔洞边界</li>
+  <li>将“Mode”设置为“Point”</li>
+  <li>在每一个孔洞之内点一个点</li>
+  <li>点击“Save to file”按钮，进行保存</li>
+</ul>
+<div id="player2" class="div_youku"></div>
+<script type="text/javascript" src="http://player.youku.com/jsapi">
+player1 = new YKU.Player('player1',{
+  client_id: '3877249b12228a92',
+  vid: 'XNzI1OTI3ODg0'
+});
+player2 = new YKU.Player('player2',{
+  client_id: '3877249b12228a92',
+  vid: 'XNzI1OTI4Nzg4'
+});
+</script>
 </div>
 
 <div class="content_container">
