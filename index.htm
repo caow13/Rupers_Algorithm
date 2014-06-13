@@ -96,13 +96,14 @@ player2 = new YKU.Player('player2',{
 <div class="alert alert-danger">注意Ruppert算法有一个限制：外边界不能有小于60度的尖角出现，否则算法可能会一直加点，无法正常结束。</div>
 <h4>算法流程</h4> 
 <ol>
-  <li>以输入图的顶点为输入，计算Delaunay 三角剖分。将剖分结果保存成 T
-  <li>统计所有 Encroach 的边，即所有没有用到的输入边和直径圆中包含其他顶点的边。
-  <li>给Encroach的边加中点，使得新的三角剖分用到了所有的输入边。
-  <li>删除所有边界外的三角形
-  <li>迭代处理所有skinny 三角形（即，最小角小于阈值的三角形）。给这些三角形加外心。如果外心没有引起Encroach，则加入；若引起Encroach， 跳转到第二步处理Encroach。
-  <li> 迭代结束，输出Ruppert算法的剖分结果
-<ol>
+  <li>以输入图的顶点为输入，计算Delaunay 三角剖分。将剖分结果保存成 T </li>
+  <li>统计所有 Encroach 的边，即所有没有用到的输入边和直径圆中包含其他顶点的边。</li>
+  <li>给Encroach的边加中点，使得新的三角剖分用到了所有的输入边。</li>
+  <li>删除所有边界外的三角形</li>
+  <li>迭代处理所有skinny 三角形（即，最小角小于阈值的三角形）。给这些三角形加外心。如果外心没有引起Encroach，则加入；若引起Encroach， 跳转到第二步处理Encroach。 </li>
+  <li> 迭代结束，输出Ruppert算法的剖分结果 </li>
+</ol>
+
 <h4>算法输出</h4>
 加点后的三角化，满足所有三角形的最小角度不小于设定的阈值
 </div>
